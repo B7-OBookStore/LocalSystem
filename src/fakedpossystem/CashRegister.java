@@ -19,6 +19,7 @@ public class CashRegister extends Application {
 		controller = loader.getController();
 
 		stage.setScene(new Scene(root));
+		stage.setTitle("O書店 エセPOSレジシステム");
 		stage.show();
 	}
 

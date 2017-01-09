@@ -16,15 +16,16 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane prefWidth="620.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fakedpossystem.CashRegisterController">
+<BorderPane prefWidth="640.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fakedpossystem.CashRegisterController">
    <top>
       <HBox alignment="CENTER_RIGHT" spacing="5.0" BorderPane.alignment="CENTER">
          <children>
             <ComboBox fx:id="storeComboBox" prefWidth="80.0" />
             <HBox alignment="CENTER_RIGHT" maxWidth="1.7976931348623157E308" spacing="2.0" HBox.hgrow="ALWAYS">
                <children>
-                  <TextField promptText="EmployeeNumber" />
-                  <Button mnemonicParsing="false" text="ログイン" />
+                  <TextField fx:id="employeeNumberField" promptText="EmployeeNumber" />
+                  <Button fx:id="loginButton" mnemonicParsing="false" onAction="#login" prefWidth="70.0" text="ログイン" />
+                  <Button fx:id="logoutButton" mnemonicParsing="false" onAction="#logout" prefWidth="70.0" text="ログアウト" visible="false" />
                </children>
             </HBox>
             <HBox>
@@ -34,7 +35,7 @@
                         <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                      </padding>
                   </Label>
-                  <Label fx:id="employeeLabel" prefWidth="100.0" style="-fx-border-style: solid; -fx-background-color: #FFFFFF;" text="ログインしてください">
+                  <Label fx:id="employeeNameLabel" prefWidth="100.0" style="-fx-border-style: solid; -fx-background-color: #FFFFFF;" text="ログインしてください">
                      <padding>
                         <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                      </padding>
@@ -44,7 +45,7 @@
                         <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                      </padding>
                   </Label>
-                  <Label prefWidth="100.0" style="-fx-border-style: solid; -fx-background-color: #FFFFFF;" text="取得中...">
+                  <Label fx:id="clockLabel" prefWidth="100.0" style="-fx-border-style: solid; -fx-background-color: #FFFFFF;" text="取得中...">
                      <padding>
                         <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                      </padding>
@@ -57,7 +58,7 @@
          </padding></HBox>
    </top>
    <left>
-      <VBox prefHeight="200.0" prefWidth="100.0" spacing="5.0" BorderPane.alignment="CENTER">
+      <VBox prefHeight="200.0" prefWidth="80.0" spacing="5.0" BorderPane.alignment="CENTER">
          <children>
             <VBox maxHeight="1.7976931348623157E308" spacing="2.0" VBox.vgrow="ALWAYS">
                <children>
@@ -88,9 +89,9 @@
    <center>
       <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
          <children>
-            <ScrollPane fitToHeight="true" fitToWidth="true">
+            <ScrollPane fitToHeight="true" fitToWidth="true" maxHeight="1.7976931348623157E308" VBox.vgrow="ALWAYS">
                <content>
-                  <TableView>
+                  <TableView maxHeight="1.7976931348623157E308">
                     <columns>
                       <TableColumn text="JANコード" />
                       <TableColumn prefWidth="75.0" text="商品名" />
@@ -103,10 +104,21 @@
                   </TableView>
                </content>
             </ScrollPane>
-            <HBox alignment="BOTTOM_RIGHT">
+            <HBox alignment="BOTTOM_RIGHT" spacing="5.0">
                <children>
-                  <TextField prefWidth="200.0" />
-                  <Button mnemonicParsing="false" text="追加" />
+                  <HBox>
+                     <children>
+                        <TextField prefWidth="100.0" promptText="OrderNumber" />
+                        <TextField prefWidth="100.0" promptText="OrderDetailNumber" />
+                        <Button mnemonicParsing="false" text="客注" />
+                     </children>
+                  </HBox>
+                  <HBox alignment="TOP_RIGHT" HBox.hgrow="ALWAYS">
+                     <children>
+                        <TextField maxWidth="1.7976931348623157E308" prefWidth="150.0" promptText="JANCode" HBox.hgrow="ALWAYS" />
+                        <Button mnemonicParsing="false" text="追加" />
+                     </children>
+                  </HBox>
                </children>
             </HBox>
          </children>
@@ -117,6 +129,19 @@
          <children>
             <VBox maxHeight="1.7976931348623157E308" spacing="2.0" VBox.vgrow="ALWAYS">
                <children>
+                  <VBox>
+                     <children>
+                        <Label alignment="CENTER" maxWidth="1.7976931348623157E308" style="-fx-border-style: solid; -fx-background-color: #ADFF2F;" text="年齢">
+                           <VBox.margin>
+                              <Insets />
+                           </VBox.margin>
+                           <padding>
+                              <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                           </padding>
+                        </Label>
+                        <TextField />
+                     </children>
+                  </VBox>
                   <VBox>
                      <children>
                         <Label alignment="CENTER" maxWidth="1.7976931348623157E308" style="-fx-border-style: solid; -fx-background-color: #00FFFF;" text="小計">
@@ -136,7 +161,7 @@
                   </VBox>
                   <VBox>
                      <children>
-                        <Label alignment="CENTER" maxWidth="1.7976931348623157E308" style="-fx-border-style: solid; -fx-background-color: #00FFFF;" text="現金">
+                        <Label alignment="CENTER" maxWidth="1.7976931348623157E308" style="-fx-border-style: solid; -fx-background-color: #FFA500;" text="現金">
                            <VBox.margin>
                               <Insets />
                            </VBox.margin>
@@ -204,7 +229,7 @@
       </VBox>
    </right>
    <bottom>
-      <Label text="Copyright © 2016-2017 B7班;㈱今北産業 All Rights Reserved." BorderPane.alignment="CENTER_RIGHT">
+      <Label text="Copyright c 2016-2017 B7班;㈱今北産業 All Rights Reserved." BorderPane.alignment="CENTER_RIGHT">
          <BorderPane.margin>
             <Insets bottom="2.0" left="5.0" right="5.0" top="2.0" />
          </BorderPane.margin>
