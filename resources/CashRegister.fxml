@@ -91,7 +91,7 @@
          <children>
             <ScrollPane fitToHeight="true" fitToWidth="true" maxHeight="1.7976931348623157E308" VBox.vgrow="ALWAYS">
                <content>
-                  <TableView maxHeight="1.7976931348623157E308">
+                  <TableView fx:id="purchaseTable" maxHeight="1.7976931348623157E308">
                     <columns>
                       <TableColumn text="JANコード" />
                       <TableColumn prefWidth="75.0" text="商品名" />
@@ -204,16 +204,16 @@
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
               </rowConstraints>
                <children>
-                  <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="1" />
-                  <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="2" GridPane.columnIndex="1" />
-                  <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="3" GridPane.columnIndex="2" />
-                  <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="4" GridPane.rowIndex="1" />
-                  <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="5" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                  <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="6" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                  <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="7" GridPane.rowIndex="2" />
-                  <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="8" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                  <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="9" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                  <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="0" GridPane.columnSpan="2147483647" GridPane.rowIndex="3" />
+                  <Button focusTraversable="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#press1" text="1" />
+                  <Button focusTraversable="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#press2" text="2" GridPane.columnIndex="1" />
+                  <Button focusTraversable="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#press3" text="3" GridPane.columnIndex="2" />
+                  <Button focusTraversable="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#press4" text="4" GridPane.rowIndex="1" />
+                  <Button focusTraversable="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#press5" text="5" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <Button focusTraversable="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#press6" text="6" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                  <Button focusTraversable="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#press7" text="7" GridPane.rowIndex="2" />
+                  <Button focusTraversable="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#press8" text="8" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                  <Button focusTraversable="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#press9" text="9" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                  <Button focusTraversable="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#press0" text="0" GridPane.columnSpan="2147483647" GridPane.rowIndex="3" />
                </children>
             </GridPane>
             <VBox spacing="2.0">

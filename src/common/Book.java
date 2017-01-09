@@ -5,42 +5,117 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.regex.Pattern;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
+import javafx.beans.property.SimpleStringProperty;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
+public class Book extends Product {
 
-public class Book {
-
-	public String id; // Google BooksのID
-	public String title; // 書籍タイトル
-	public String publisher; // 出版社
-	public String author; // 作者
-	public String publishedDate; // 出版日
-
-	public String janCode; // JANコード(ISBN-13)
-	public String ownCode; // ISBN-10、または雑誌コード
+	public String title;
+	public String writer;
+	public String publisher;
+	public String isbn10;
+	public String magazineCode;
+	public String googleID;
 
 	public boolean isStocked;
 	public boolean isInPrint;
 
+	private SimpleStringProperty janCodeProperty;
+	private SimpleStringProperty titleProperty;
+	private SimpleStringProperty priceProperty;
+	private SimpleStringProperty discountProperty;
+
+	public Book(int janCode, int price, String title, String writer, String publisher,
+			String isbn10, String magazineCode, String googleID) {
+		super(janCode, price);
+
+		this.title = title;
+		this.writer = writer;
+		this.publisher = publisher;
+		this.isbn10 = isbn10;
+		this.magazineCode = magazineCode;
+		this.googleID = googleID;
+
+		this.isInPrint = isInPrint();
+
+		janCodeProperty = new SimpleStringProperty(String.valueOf(janCode));
+		titleProperty = new SimpleStringProperty(title);
+		priceProperty = new SimpleStringProperty(String.valueOf(price));
+		discountProperty = new SimpleStringProperty("");
+	}
+
+	Boolean isInPrint() {
+		try {
+			URL url = new URL(
+					"http://www.books.or.jp/ResultList.aspx?scode=&searchtype=1&showcount=1&startindex=0&isbn="
+							+ janCode);
+			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+			InputStream input = connection.getInputStream();
+
+			BufferedReader reader = new BufferedReader(new InputStreamReader(input, "UTF-8"));
+			StringBuffer buf = new StringBuffer();
+
+			while (reader.readLine() != null) {
+				buf.append(reader.readLine());
+				buf.append("\n");
+			}
+
+			String html = buf.toString();
+
+			int index = html.indexOf("<div id=\"htcFoundCount\" class=\"num\">");
+			String count = html.substring(index + 36, index + 37);
+
+			if (count.equals("0")) {
+				return false;
+			} else {
+				return true;
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	public String getJanCodeProperty() {
+		return janCodeProperty.get();
+	}
+
+	public void setJanCodeProperty(String janCode) {
+		janCodeProperty.set(janCode);
+	}
+
+	public String getTitleProperty() {
+		return titleProperty.get();
+	}
+
+	public void setTitleProperty(String title) {
+		titleProperty.set(title);
+	}
+
+	public String getPriceProperty() {
+		return priceProperty.get();
+	}
+
+	public void setPriceProperty(String price) {
+		priceProperty.set(price);
+	}
+
+	public String getDiscountProperty() {
+		return discountProperty.get();
+	}
+
+	public void setDiscountProperty(String discount) {
+		discountProperty.set(discount);
+	}
+
+	/*
 	public static final Pattern PTN_ISBN10 = Pattern.compile("^\\d{9}(\\d|x)$");
 	public static final Pattern PTN_ISBN13 = Pattern.compile("^\\d{13}$");
 
-	public Book(String id) throws Exception {
-		this.id = id;
-		setInfoById(id);
-		this.isInPrint = isInPrint();
-	}
-
-	public Book(String title, String publisher, String author, String code) throws Exception {
-		this.title = title;
-		this.publisher = publisher;
-		this.author = author;
-		setCode(code);
+	public Book(String googleID) {
+		this.googleID = googleID;
+		setInfoById(googleID);
 		this.isInPrint = isInPrint();
 	}
 
@@ -80,34 +155,7 @@ public class Book {
 
 		return str;
 	}
-
-	Boolean isInPrint() throws Exception {
-		URL url = new URL(
-				"http://www.books.or.jp/ResultList.aspx?scode=&searchtype=1&showcount=1&startindex=0&isbn="
-						+ janCode);
-		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-		InputStream input = connection.getInputStream();
-
-		BufferedReader reader = new BufferedReader(new InputStreamReader(input, "UTF-8"));
-		StringBuffer buf = new StringBuffer();
-
-		while (reader.readLine() != null) {
-			buf.append(reader.readLine());
-			buf.append("\n");
-		}
-
-		String html = buf.toString();
-
-		int index = html.indexOf("<div id=\"htcFoundCount\" class=\"num\">");
-		String count = html.substring(index + 36, index + 37);
-
-		if (count.equals("0")) {
-			return false;
-		} else {
-			return true;
-		}
-	}
-
+	
 	void setCode(String code) {
 		if (PTN_ISBN13.matcher(code).find()) {
 			this.janCode = code;
@@ -182,4 +230,5 @@ public class Book {
 
 		return Integer.toString(checkDigit);
 	}
+	*/
 }

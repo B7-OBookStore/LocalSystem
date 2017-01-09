@@ -71,13 +71,13 @@ public class OrderManager extends Application {
 		container.getChildren().add(new Button("\u2795 í«â¡"));
 		container.setAlignment(Pos.CENTER_RIGHT);
 
-		try {
+		/*try {
 			addBook(container, new Book("1xMfNwAACAAJ"));
 			addBook(container, new Book("_E4DvgAACAAJ"));
 			addBook(container, new Book("Z9gjDAAAQBAJ"));
 		} catch (Exception e) {
 			e.printStackTrace();
-		}
+		}*/
 
 		centerBlock.setStyle("-fx-fit-to-width: true;");
 		container.setStyle("-fx-padding: 10;");
@@ -99,13 +99,13 @@ public class OrderManager extends Application {
 		orderTable.add(new Label(book.publisher), 1, 1);
 
 		orderTable.add(new Label("íòé“"), 0, 2);
-		orderTable.add(new Label(book.author), 1, 2);
+		orderTable.add(new Label(book.writer), 1, 2);
 
 		orderTable.add(new Label("JAN (ISBN-13)"), 0, 3);
-		orderTable.add(new Label(book.janCode), 1, 3);
+		orderTable.add(new Label(book.janCode + ""), 1, 3);
 
 		orderTable.add(new Label("ISBN-10/éGéèÉRÅ[Éh"), 0, 4);
-		orderTable.add(new Label(book.ownCode), 1, 4);
+		orderTable.add(new Label(book.isbn10), 1, 4);
 
 		orderTable.add(new Label("ç›å…"), 0, 5);
 		if (book.isStocked) {
@@ -174,7 +174,7 @@ public class OrderManager extends Application {
 			bw.write(book.publisher + ",");
 			bw.write(book.janCode + ",");
 			bw.write(book.title + ",");
-			bw.write(book.author + ",");
+			bw.write(book.writer + ",");
 			bw.write("1" + ",");
 
 			bw.newLine();
