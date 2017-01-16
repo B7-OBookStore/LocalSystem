@@ -26,7 +26,8 @@ public class CashRegister extends Application {
 		BorderPane root = (BorderPane) loader.load();
 		controller = loader.getController();
 
-		splashScreen.close();
+		if (splashScreen != null)
+			splashScreen.close();
 		stage.setScene(new Scene(root));
 		stage.setTitle("O書店 エセPOSレジシステム");
 		stage.show();
