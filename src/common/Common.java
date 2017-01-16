@@ -8,6 +8,10 @@ import java.sql.Statement;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
+import javafx.util.Callback;
 
 public class Common {
 
@@ -20,9 +24,24 @@ public class Common {
 
 	protected ObservableList<Store> stores = FXCollections.observableArrayList();
 
+	protected Callback<ListView<Store>, ListCell<Store>> storeCellFactory = (ListView<Store> param) -> new ListCell<Store>() {
+		@Override
+		protected void updateItem(Store item, boolean empty) {
+			super.updateItem(item, empty);
+			if (item != null && !empty) {
+				setText(item.storeName);
+			}
+		}
+	};
+
 	public Common() {
 		sqlConnect();
-		reload();
+
+		try {
+			setStores();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void sqlConnect() {
@@ -38,14 +57,6 @@ public class Common {
 		try {
 			con.close();
 			stmt.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public void reload() {
-		try {
-			setStores();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -67,5 +78,21 @@ public class Common {
 		rs.next();
 
 		return rs.getString("EmployeeName");
+	}
+
+	public int getNextNumber(String column, String table) throws SQLException {
+		String sqlStr = "SELECT MAX(" + column + ") FROM " + table;
+		ResultSet rs = stmt.executeQuery(sqlStr);
+		rs.next();
+
+		return rs.getInt(column) + 1;
+	}
+
+	public String getTextWithNull(TextField textField) {
+		if (textField.getText().isEmpty()) {
+			return null;
+		} else {
+			return textField.getText();
+		}
 	}
 }

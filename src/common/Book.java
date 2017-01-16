@@ -6,45 +6,29 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import javafx.beans.property.SimpleStringProperty;
-
 public class Book extends Product {
 
-	public String title;
 	public String writer;
 	public String publisher;
 	public String isbn10;
 	public String magazineCode;
 	public String googleID;
 
-	public boolean isStocked;
-	public boolean isInPrint;
+	public boolean printing;
+	public int stock;
 
-	private SimpleStringProperty janCodeProperty;
-	private SimpleStringProperty titleProperty;
-	private SimpleStringProperty priceProperty;
-	private SimpleStringProperty discountProperty;
-
-	public Book(int janCode, int price, String title, String writer, String publisher,
+	public Book(long janCode, int price, String productName, String writer, String publisher,
 			String isbn10, String magazineCode, String googleID) {
-		super(janCode, price);
+		super(janCode, price, productName);
 
-		this.title = title;
 		this.writer = writer;
 		this.publisher = publisher;
 		this.isbn10 = isbn10;
 		this.magazineCode = magazineCode;
 		this.googleID = googleID;
-
-		this.isInPrint = isInPrint();
-
-		janCodeProperty = new SimpleStringProperty(String.valueOf(janCode));
-		titleProperty = new SimpleStringProperty(title);
-		priceProperty = new SimpleStringProperty(String.valueOf(price));
-		discountProperty = new SimpleStringProperty("");
 	}
 
-	Boolean isInPrint() {
+	public static Boolean isPrinting(long janCode) {
 		try {
 			URL url = new URL(
 					"http://www.books.or.jp/ResultList.aspx?scode=&searchtype=1&showcount=1&startindex=0&isbn="
@@ -76,159 +60,4 @@ public class Book extends Product {
 			return false;
 		}
 	}
-
-	public String getJanCodeProperty() {
-		return janCodeProperty.get();
-	}
-
-	public void setJanCodeProperty(String janCode) {
-		janCodeProperty.set(janCode);
-	}
-
-	public String getTitleProperty() {
-		return titleProperty.get();
-	}
-
-	public void setTitleProperty(String title) {
-		titleProperty.set(title);
-	}
-
-	public String getPriceProperty() {
-		return priceProperty.get();
-	}
-
-	public void setPriceProperty(String price) {
-		priceProperty.set(price);
-	}
-
-	public String getDiscountProperty() {
-		return discountProperty.get();
-	}
-
-	public void setDiscountProperty(String discount) {
-		discountProperty.set(discount);
-	}
-
-	/*
-	public static final Pattern PTN_ISBN10 = Pattern.compile("^\\d{9}(\\d|x)$");
-	public static final Pattern PTN_ISBN13 = Pattern.compile("^\\d{13}$");
-
-	public Book(String googleID) {
-		this.googleID = googleID;
-		setInfoById(googleID);
-		this.isInPrint = isInPrint();
-	}
-
-	void setInfoById(String id) throws Exception {
-		URL url = new URL("https://www.google.com/books/feeds/volumes/" + id);
-		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		DocumentBuilder db = dbf.newDocumentBuilder();
-		Document doc = db.parse(url.openStream());
-
-		NodeList codeList = doc.getElementsByTagName("dc:identifier");
-		for (int i = 0; i < codeList.getLength(); i++) {
-			String code = codeList.item(i).getLastChild().getNodeValue().substring(5);
-
-			if (PTN_ISBN10.matcher(code).find()) {
-				this.ownCode = code;
-			}
-			if (PTN_ISBN13.matcher(code).find()) {
-				this.janCode = code;
-			}
-		}
-
-		title = getElementString(doc, "dc:title");
-		publisher = getElementString(doc, "dc:publisher");
-		author = getElementString(doc, "dc:creator");
-		publishedDate = getElementString(doc, "dc:date");
-	}
-
-	String getElementString(Document doc, String tagName) {
-		String str = "";
-		NodeList nodeList = doc.getElementsByTagName(tagName);
-
-		for (int i = 0; i < nodeList.getLength(); i++) {
-			if (i > 0)
-				str += "　";
-			str += nodeList.item(i).getLastChild().getNodeValue();
-		}
-
-		return str;
-	}
-	
-	void setCode(String code) {
-		if (PTN_ISBN13.matcher(code).find()) {
-			this.janCode = code;
-			this.ownCode = getOwnCode(code);
-		} else {
-			this.janCode = getJanCode(code);
-			this.ownCode = code;
-		}
-	}
-
-	String getOwnCode(String janCode) {
-		String number = janCode.substring(3, 12);
-		String ownCheckDigit = getOwnCheckDigit(number);
-		String ownCode = number + ownCheckDigit;
-		return ownCode;
-	}
-
-	String getJanCode(String ownCode) {
-		String number = "";
-
-		if (PTN_ISBN10.matcher(ownCode).find()) {
-			// ISBN10
-			number = "978" + ownCode.substring(0, 9);
-		} else {
-			// 雑誌コード
-			if (ownCode.charAt(0) == 'T') {
-				// Tで始まる雑誌コードの場合
-				ownCode = ownCode.substring(3, 10);
-			}
-			number = "4910" + ownCode + publishedDate.charAt(3);
-		}
-
-		String janCheckDigit = getJanCheckDigit(number);
-		String janCode = number + janCheckDigit;
-		return janCode;
-	}
-
-	String getOwnCheckDigit(String number) {
-		int sum = 0;
-		for (int i = 0; i < 9; i++) {
-			int base = Integer.parseInt(number.substring(i, i + 1));
-			int multi = 10 - i;
-			sum += base * multi;
-		}
-		int check = 11 - (sum % 11);
-
-		if (check == 10) {
-			return "X";
-		} else if (check == 11) {
-			return "0";
-		} else {
-			return Integer.toString(check);
-		}
-	}
-
-	String getJanCheckDigit(String number) {
-		// 偶数桁の合計
-		int evenSum = 0;
-		for (int evenIndex = 0; evenIndex < number.length(); evenIndex += 2) {
-			evenSum += Integer.parseInt(number.substring(evenIndex, evenIndex + 1));
-		}
-
-		// 奇数桁の合計
-		int oddSum = 0;
-		for (int oddIndex = 1; oddIndex < number.length(); oddIndex += 2) {
-			oddSum += Integer.parseInt(number.substring(oddIndex, oddIndex + 1));
-		}
-
-		int checkSum = evenSum + (oddSum * 3);
-		int checkDigit = 10 - (checkSum % 10); // 10から1の位を引く
-		checkDigit %= 10; // 10は0にする
-
-		return Integer.toString(checkDigit);
-	}
-	*/
 }

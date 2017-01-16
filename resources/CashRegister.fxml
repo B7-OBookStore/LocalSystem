@@ -108,15 +108,15 @@
                <children>
                   <HBox>
                      <children>
-                        <TextField prefWidth="100.0" promptText="OrderNumber" />
-                        <TextField prefWidth="100.0" promptText="OrderDetailNumber" />
-                        <Button mnemonicParsing="false" text="客注" />
+                        <TextField fx:id="orderNumberField" prefWidth="100.0" promptText="OrderNumber" />
+                        <TextField fx:id="orderDetailNumberField" prefWidth="100.0" promptText="OrderDetailNumber" />
+                        <Button mnemonicParsing="false" onAction="#addOrder" text="客注" />
                      </children>
                   </HBox>
                   <HBox alignment="TOP_RIGHT" HBox.hgrow="ALWAYS">
                      <children>
-                        <TextField maxWidth="1.7976931348623157E308" prefWidth="150.0" promptText="JANCode" HBox.hgrow="ALWAYS" />
-                        <Button mnemonicParsing="false" text="追加" />
+                        <TextField fx:id="janCodeField" maxWidth="1.7976931348623157E308" prefWidth="150.0" promptText="JANCode" HBox.hgrow="ALWAYS" />
+                        <Button mnemonicParsing="false" onAction="#addPurchase" text="追加" />
                      </children>
                   </HBox>
                </children>
@@ -139,7 +139,7 @@
                               <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
                            </padding>
                         </Label>
-                        <TextField />
+                        <TextField fx:id="ageField" />
                      </children>
                   </VBox>
                   <VBox>
@@ -152,7 +152,7 @@
                               <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
                            </padding>
                         </Label>
-                        <Label maxWidth="1.7976931348623157E308" style="-fx-border-style: solid; -fx-background-color: #FFFFFF;" text="0">
+                        <Label fx:id="sumLabel" maxWidth="1.7976931348623157E308" style="-fx-border-style: solid; -fx-background-color: #FFFFFF;" text="0">
                            <padding>
                               <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
                            </padding>
@@ -169,7 +169,7 @@
                               <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
                            </padding>
                         </Label>
-                        <TextField disable="true" maxWidth="1.7976931348623157E308" />
+                        <TextField fx:id="cashField" disable="true" maxWidth="1.7976931348623157E308" />
                      </children>
                   </VBox>
                   <VBox>
@@ -182,7 +182,7 @@
                               <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
                            </padding>
                         </Label>
-                        <Label maxWidth="1.7976931348623157E308" style="-fx-border-style: solid; -fx-background-color: #FFFFFF;" text="0">
+                        <Label fx:id="changeLabel" maxWidth="1.7976931348623157E308" style="-fx-border-style: solid; -fx-background-color: #FFFFFF;" text="0">
                            <padding>
                               <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
                            </padding>
@@ -218,8 +218,8 @@
             </GridPane>
             <VBox spacing="2.0">
                <children>
-                  <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="小計" />
-                  <Button disable="true" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="お預かり・確定" />
+                  <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#sum" text="小計" />
+                  <Button fx:id="confirmButton" disable="true" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#confirm" text="お預かり・確定" />
                </children>
             </VBox>
          </children>
