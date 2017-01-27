@@ -2,26 +2,23 @@ package common;
 
 import javafx.beans.property.SimpleStringProperty;
 
-public class Product {
+public class Item {
 
-	public long janCode;
+	public String janCode;
 	public int price;
-	public String productName;
+	public int discount;
 
 	private SimpleStringProperty janCodeProperty;
-	private SimpleStringProperty productNameProperty;
 	private SimpleStringProperty priceProperty;
 	private SimpleStringProperty discountProperty;
 
-	public Product(long janCode, int price, String productName) {
+	public Item(String janCode, int price, int discount) {
 		this.janCode = janCode;
 		this.price = price;
-		this.productName = productName;
 
 		janCodeProperty = new SimpleStringProperty(String.valueOf(janCode));
-		productNameProperty = new SimpleStringProperty(productName);
 		priceProperty = new SimpleStringProperty(String.valueOf(price));
-		discountProperty = new SimpleStringProperty("");
+		discountProperty = new SimpleStringProperty(String.valueOf(discount));
 	}
 
 	public String getJanCodeProperty() {
@@ -30,14 +27,6 @@ public class Product {
 
 	public void setJanCodeProperty(String janCode) {
 		janCodeProperty.set(janCode);
-	}
-
-	public String getTitleProperty() {
-		return productNameProperty.get();
-	}
-
-	public void setTitleProperty(String title) {
-		productNameProperty.set(title);
 	}
 
 	public String getPriceProperty() {

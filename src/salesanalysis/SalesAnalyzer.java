@@ -8,12 +8,11 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
-import ordermanagement.OrderManagerController;
 
 public class SalesAnalyzer extends Application {
 
 	private SplashScreen splashScreen;
-	OrderManagerController controller;
+	SalesAnalyzerController controller;
 
 	@Override
 	public void init() throws Exception {
@@ -23,7 +22,7 @@ public class SalesAnalyzer extends Application {
 	@Override
 	public void start(Stage stage) throws IOException {
 		FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource(
-				"OrderManager.fxml"));
+				"SalesAnalyzer.fxml"));
 		BorderPane root = (BorderPane) loader.load();
 		controller = loader.getController();
 

@@ -11,11 +11,10 @@ public class OrderBook extends Book {
 	public String mail;
 	public int contact;
 
-	public OrderBook(long janCode, int price, String productName, String writer, String publisher,
-			String isbn10, String magazineCode, String googleID, int orderNumber,
-			int orderDetailNumber, int customerNumber, String name, String phone, String mail,
-			int contact) {
-		super(janCode, price, productName, writer, publisher, isbn10, magazineCode, googleID);
+	public OrderBook(String janCode, int price, int discount, String bookTitle, String writer,
+			String publisher, String googleID, int orderNumber, int orderDetailNumber,
+			int customerNumber, String name, String phone, String mail, int contact) {
+		super(janCode, price, discount, bookTitle, writer, publisher, googleID);
 
 		this.orderNumber = orderNumber;
 		this.orderDetailNumber = orderDetailNumber;

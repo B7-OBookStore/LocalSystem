@@ -15,9 +15,9 @@ import javafx.util.Callback;
 
 public class Common {
 
-	private static final String URL = "jdbc:mysql://ja-cdbr-azure-east-a.cloudapp.net/b7_obookstore";
-	private static final String ID = "b62d87cb5623a5";
-	private static final String PASSWORD = "6d93d6d8";
+	private static final String URL = "jdbc:mysql://127.0.0.1/websysb7";
+	private static final String ID = "root";
+	private static final String PASSWORD = "b7";
 
 	protected Connection con;
 	protected Statement stmt;
@@ -35,16 +35,15 @@ public class Common {
 	};
 
 	public Common() {
-		sqlConnect();
-
 		try {
+			sqlConnect();
 			setStores();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
 
-	public void sqlConnect() {
+	public void sqlConnect() throws SQLException {
 		try {
 			con = DriverManager.getConnection(URL, ID, PASSWORD);
 			stmt = con.createStatement();
@@ -53,21 +52,26 @@ public class Common {
 		}
 	}
 
-	public void sqlClose() {
-		try {
-			con.close();
-			stmt.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+	public void sqlClose() throws SQLException {
+		con.close();
+		stmt.close();
 	}
 
+	public ResultSet getRS(String sql) throws SQLException {
+		if (con.isClosed() || stmt.isClosed()) {
+			sqlConnect();
+		}
+		ResultSet rs = stmt.executeQuery(sql);
+
+		return rs;
+	};
+
 	public void setStores() throws SQLException {
-		String sqlStr = "SELECT * FROM store";
-		ResultSet rs = stmt.executeQuery(sqlStr);
+		String sqlStr = "SELECT * FROM Store";
+		ResultSet rs = getRS(sqlStr);
 
 		while (rs.next()) {
-			stores.add(new Store(rs.getInt("StoreNumber"), rs.getString("StoreName")));
+			stores.add(new Store(rs.getInt("StoreNum"), rs.getString("StoreName")));
 		}
 	}
 

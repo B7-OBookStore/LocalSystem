@@ -20,8 +20,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="450.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="450.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="salesanalysis.SalesAnalyzerController">
    <top>
       <HBox alignment="BOTTOM_CENTER" style="-fx-background-color: #8B4513;" BorderPane.alignment="CENTER">
          <children>
@@ -47,13 +46,13 @@
                         <VBox spacing="3.0">
                            <children>
                               <Label text="店舗" />
-                              <ComboBox maxWidth="1.7976931348623157E308" />
+                              <ComboBox fx:id="storeComboBox" maxWidth="1.7976931348623157E308" onAction="#reload" />
                            </children>
                         </VBox>
                         <VBox spacing="3.0">
                            <children>
                               <Label text="期間" />
-                              <ComboBox maxWidth="1.7976931348623157E308" />
+                              <ComboBox fx:id="periodComboBox" maxWidth="1.7976931348623157E308" onAction="#reload" />
                            </children>
                         </VBox>
                         <VBox spacing="3.0">
@@ -61,7 +60,7 @@
                               <Label text="在庫フィルタ" />
                               <Label minWidth="-Infinity" text="冊以下">
                                  <graphic>
-                                    <TextField prefWidth="70.0" text="10" />
+                                    <TextField onAction="#reload" prefWidth="70.0" text="10" />
                                  </graphic>
                               </Label>
                            </children>
@@ -86,7 +85,7 @@
    <right>
       <VBox prefWidth="160.0" BorderPane.alignment="CENTER">
          <children>
-            <TitledPane text="補充発注リスト">
+            <TitledPane text="補充発注リスト" VBox.vgrow="ALWAYS">
                <content>
                   <ScrollPane fitToHeight="true" fitToWidth="true">
                      <content>
@@ -116,7 +115,7 @@
                      <content>
                         <ScrollPane fitToHeight="true" fitToWidth="true">
                            <content>
-                              <TableView>
+                              <TableView fx:id="recentTableView">
                                 <columns>
                                     <TableColumn prefWidth="75.0" text="JANコード" />
                                   <TableColumn prefWidth="75.0" text="書名" />
@@ -135,7 +134,7 @@
                      <content>
                         <ScrollPane fitToHeight="true" fitToWidth="true">
                            <content>
-                              <TableView>
+                              <TableView fx:id="popularTableView">
                                  <columns>
                                     <TableColumn prefWidth="75.0" text="JANコード" />
                                     <TableColumn prefWidth="75.0" text="書名" />
@@ -154,7 +153,7 @@
                      <content>
                         <ScrollPane fitToHeight="true" fitToWidth="true">
                            <content>
-                              <TableView>
+                              <TableView fx:id="orderTableView">
                                  <columns>
                                     <TableColumn prefWidth="75.0" text="JANコード" />
                                     <TableColumn prefWidth="75.0" text="書名" />
@@ -175,12 +174,12 @@
                            <items>
                               <ScrollPane fitToHeight="true" fitToWidth="true">
                                  <content>
-                                    <ListView />
+                                    <ListView fx:id="writerListView" />
                                  </content>
                               </ScrollPane>
                               <ScrollPane fitToHeight="true" fitToWidth="true">
                                  <content>
-                                    <TableView>
+                                    <TableView fx:id="writerTableView">
                                        <columns>
                                           <TableColumn prefWidth="75.0" text="JANコード" />
                                           <TableColumn prefWidth="75.0" text="書名" />

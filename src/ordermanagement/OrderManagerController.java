@@ -71,7 +71,7 @@ public class OrderManagerController extends Common implements Initializable {
 					+ "LEFT JOIN stock ON orderbookdetail.JANCode = stock.JANCode AND orderbook.StoreNumber = stock.StoreNumber "
 					+ "WHERE (DeliveryStatus = 0 OR DeliveryStatus IS NULL) "
 					+ "AND orderbook.StoreNumber = "
-					+ storeComboBox.getSelectionModel().getSelectedItem().storeNumber;
+					+ storeComboBox.getSelectionModel().getSelectedItem().storeNum;
 			ResultSet rs = stmt.executeQuery(sqlStr);
 
 			if (!rs.next()) {

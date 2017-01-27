@@ -25,28 +25,28 @@ import javafx.stage.Window;
 
 import common.Book;
 import common.Common;
-import common.Product;
+import common.Item;
 import common.Store;
 
 public class CashRegisterController extends Common implements Initializable {
 
 	public ComboBox<Store> storeComboBox;
-	public Label employeeNameLabel;
+	public Label staffNameLabel;
 	public Label clockLabel;
 	public Label sumLabel;
 	public Label changeLabel;
-	public TextField employeeNumberField;
-	public TextField orderNumberField;
-	public TextField orderDetailNumberField;
+	public TextField staffNumField;
+	public TextField requestNumField;
+	public TextField requestDetNumField;
 	public TextField janCodeField;
 	public TextField cashField;
 	public TextField ageField;
 	public Button loginButton;
 	public Button logoutButton;
 	public Button confirmButton;
-	public TableView<Product> purchaseTable;
+	public TableView<Item> purchaseTable;
 
-	private ObservableList<Product> products = FXCollections.observableArrayList();
+	private ObservableList<Item> items = FXCollections.observableArrayList();
 
 	@Override
 	public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -61,27 +61,25 @@ public class CashRegisterController extends Common implements Initializable {
 		purchaseTable.getColumns().get(0)
 				.setCellValueFactory(new PropertyValueFactory<>("janCodeProperty"));
 		purchaseTable.getColumns().get(1)
-				.setCellValueFactory(new PropertyValueFactory<>("titleProperty"));
+				.setCellValueFactory(new PropertyValueFactory<>("bookTitleProperty"));
 		purchaseTable.getColumns().get(2)
 				.setCellValueFactory(new PropertyValueFactory<>("priceProperty"));
 		purchaseTable.getColumns().get(3)
 				.setCellValueFactory(new PropertyValueFactory<>("discountProperty"));
 
-		purchaseTable.setItems(products);
+		purchaseTable.setItems(items);
 	}
 
 	@FXML
 	void login() {
 		try {
-			String sqlStr = "SELECT * FROM employee WHERE EmployeeNumber = "
-					+ employeeNumberField.getText();
-			ResultSet rs = stmt.executeQuery(sqlStr);
+			ResultSet rs = getRS("Select * FROM Staff WHERE StaffNum=" + staffNumField.getText());
 
 			if (rs.next()) {
-				employeeNameLabel.setText(rs.getString("EmployeeName"));
-				storeComboBox.getSelectionModel().select(rs.getInt("StoreNumber"));
+				staffNameLabel.setText(rs.getString("StaffName"));
+				storeComboBox.getSelectionModel().select(rs.getInt("StoreNum"));
 
-				employeeNumberField.setDisable(true);
+				staffNumField.setDisable(true);
 				storeComboBox.setDisable(true);
 
 				loginButton.setVisible(false);
@@ -94,9 +92,9 @@ public class CashRegisterController extends Common implements Initializable {
 
 	@FXML
 	void logout() {
-		employeeNameLabel.setText("ログインしてください");
+		staffNameLabel.setText("ログインしてください");
 
-		employeeNumberField.setDisable(false);
+		staffNumField.setDisable(false);
 		storeComboBox.setDisable(false);
 
 		loginButton.setVisible(true);
@@ -106,24 +104,24 @@ public class CashRegisterController extends Common implements Initializable {
 	@FXML
 	void addPurchase() {
 		try {
-			String sqlStr = "UPDATE stock SET Num = Num - 1 WHERE StoreNumber = "
-					+ storeComboBox.getSelectionModel().getSelectedItem().storeNumber
+			String sqlStr = "UPDATE Stock SET StockAmount = StockAmount - 1 WHERE StoreNum = "
+					+ storeComboBox.getSelectionModel().getSelectedItem().storeNum
 					+ " AND JANCode = " + janCodeField.getText();
 			stmt.executeUpdate(sqlStr);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 
-		addProduct(Long.parseLong(janCodeField.getText()));
+		addItem(Long.parseLong(janCodeField.getText()));
 		janCodeField.clear();
 	}
 
 	@FXML
-	void addOrder() {
-		String orderNumber = orderNumberField.getText();
-		String orderDetailNumber = orderDetailNumberField.getText();
+	void addRequest() {
+		String requestNum = requestNumField.getText();
+		String requestDetNum = requestDetNumField.getText();
 
-		if (orderNumber.isEmpty() || orderDetailNumber.isEmpty()) {
+		if (requestNum.isEmpty() || requestDetNum.isEmpty()) {
 			return;
 		}
 
@@ -138,17 +136,20 @@ public class CashRegisterController extends Common implements Initializable {
 
 		gridPane.add(new Label("名前"), 0, 0);
 		gridPane.add(new Label("電話番号"), 0, 1);
-		gridPane.add(new Label("メールアドレス"), 0, 2);
-		gridPane.add(button, 0, 3);
+		gridPane.add(new Label("住所"), 0, 2);
+		gridPane.add(button, 0, 7);
 
 		try {
-			String sqlStr = "SELECT * FROM orderbook WHERE OrderNumber = " + orderNumber;
-			ResultSet rs = stmt.executeQuery(sqlStr);
+			ResultSet rs = getRS("SELECT * FROM Request WHERE RequestNum=" + requestNum);
 
 			if (rs.next()) {
 				gridPane.add(new Label(rs.getString("Name")), 1, 0);
 				gridPane.add(new Label(rs.getString("Phone")), 1, 1);
-				gridPane.add(new Label(rs.getString("Mail")), 1, 2);
+				gridPane.add(new Label("〒" + rs.getString("ZipCode")), 1, 2);
+				gridPane.add(new Label(rs.getString("Pref")), 1, 3);
+				gridPane.add(new Label(rs.getString("City")), 1, 4);
+				gridPane.add(new Label(rs.getString("Address")), 1, 5);
+				gridPane.add(new Label(rs.getString("Apartment")), 1, 6);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -156,48 +157,49 @@ public class CashRegisterController extends Common implements Initializable {
 
 		button.setOnAction((ActionEvent) -> {
 			try {
-				String sqlStr = "SELECT * FROM orderbookdetail WHERE OrderNumber = " + orderNumber
-						+ " AND OrderDetailNumber = " + orderDetailNumber;
-				ResultSet rs = stmt.executeQuery(sqlStr);
+				String sqlStr = "SELECT * FROM RequestDetail WHERE RequestNum = " + requestNum
+						+ " AND RequestDetNum = " + requestDetNum;
+				ResultSet rs = getRS(sqlStr);
 
 				if (rs.next()) {
-					addProduct(rs.getLong("JANCode"));
+					addItem(rs.getLong("JANCode"));
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 
 			try {
-				String sqlStr = "UPDATE orderbookdetail SET DeliveryStatus = 2 WHERE OrderNumber = "
-						+ orderNumber + " AND OrderDetailNumber = " + orderDetailNumber;
+				String sqlStr = "UPDATE RequestDetail SET DeliveryStat = 4 WHERE RequestNum = "
+						+ requestNum + " AND RequestDetNum = " + requestDetNum;
 				stmt.executeUpdate(sqlStr);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 
-			orderNumberField.clear();
-			orderDetailNumberField.clear();
+			requestNumField.clear();
+			requestDetNumField.clear();
 
 			stage.close();
 		});
 
-		Window window = orderNumberField.getScene().getWindow();
+		Window window = requestNumField.getScene().getWindow();
 		Scene scene = new Scene(gridPane);
 		stage.setScene(scene);
 		stage.initOwner(window);
 		stage.show();
 	}
 
-	void addProduct(long janCode) {
+	void addItem(long janCode) {
 		try {
-			String sqlStr = "SELECT * FROM product,book WHERE product.janCode = book.janCode and product.janCode = "
+			String sqlStr = "SELECT * FROM Item,Book WHERE Item.JANCode = Book.JANCode and Item.JANCode = "
 					+ janCode;
-			ResultSet rs = stmt.executeQuery(sqlStr);
-			rs.next();
+			ResultSet rs = getRS(sqlStr);
 
-			products.add(new Book(rs.getLong("JANCode"), rs.getInt("Price"), rs
-					.getString("ProductName"), rs.getString("Writer"), rs.getString("Publisher"),
-					rs.getString("ISBN10"), rs.getString("MagazineCode"), rs.getString("googleID")));
+			if (rs.next()) {
+				items.add(new Book(rs.getString("JANCode"), rs.getInt("Price"), rs
+						.getInt("Discount"), rs.getString("BookTitle"), rs.getString("Writer"), rs
+						.getString("Publisher"), rs.getString("googleID")));
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -212,7 +214,7 @@ public class CashRegisterController extends Common implements Initializable {
 	void sum() {
 		int sum = 0;
 
-		for (Product product : products) {
+		for (Item product : items) {
 			sum += product.price;
 		}
 
@@ -227,32 +229,33 @@ public class CashRegisterController extends Common implements Initializable {
 		int change = Integer.parseInt(cashField.getText()) - Integer.parseInt(sumLabel.getText());
 
 		String age = getTextWithNull(ageField);
-		String employeeNumber = getTextWithNull(employeeNumberField);
-		int saleNumber = 0;
+		String staffNum = getTextWithNull(staffNumField);
+		int storeNum = storeComboBox.getSelectionModel().getSelectedItem().storeNum;
+		int saleNum = 0;
 
 		try {
-			String sqlStr = "SELECT COUNT(*) FROM sale WHERE SaleDate = CURRENT_DATE";
-			ResultSet rs = stmt.executeQuery(sqlStr);
+			ResultSet rs = getRS("SHOW TABLE STATUS WHERE Name = 'Sale'");
 			if (rs.next()) {
-				saleNumber = rs.getInt(1);
+				saleNum = rs.getInt("Auto_increment");
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 
 		try {
-			String sqlStr = "INSERT INTO sale VALUES(" + saleNumber + ",CURRENT_DATE,"
-					+ employeeNumber + "," + age + ")";
+			String sqlStr = "INSERT INTO Sale VALUES(" + saleNum + ",CURRENT_DATE," + storeNum
+					+ "," + staffNum + "," + age + ")";
 			stmt.executeUpdate(sqlStr);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 
-		for (int i = 0; i < products.size(); i++) {
-			Product product = products.get(i);
+		for (int i = 0; i < items.size(); i++) {
+			Item item = items.get(i);
 			try {
-				String sqlStr = "INSERT INTO saledetail VALUES(" + saleNumber + ",CURRENT_DATE,"
-						+ i + "," + product.janCode + "," + product.price + ",NULL)";
+				String sqlStr = "INSERT INTO SaleDetail VALUES(" + saleNum + ",CURRENT_DATE,"
+						+ storeNum + "," + i + "," + item.janCode + "," + item.price + ","
+						+ item.discount + ")";
 				stmt.executeUpdate(sqlStr);
 			} catch (SQLException e) {
 				e.printStackTrace();
@@ -262,7 +265,7 @@ public class CashRegisterController extends Common implements Initializable {
 		changeLabel.setText(String.valueOf(change));
 		cashField.clear();
 		ageField.clear();
-		products.clear();
+		items.clear();
 		confirmButton.setDisable(true);
 		cashField.setDisable(true);
 	}

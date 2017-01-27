@@ -6,26 +6,34 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class Book extends Product {
+import javafx.beans.property.SimpleStringProperty;
 
+public class Book extends Item {
+
+	public String bookTitle;
 	public String writer;
 	public String publisher;
-	public String isbn10;
-	public String magazineCode;
 	public String googleID;
 
 	public boolean printing;
 	public int stock;
 
-	public Book(long janCode, int price, String productName, String writer, String publisher,
-			String isbn10, String magazineCode, String googleID) {
-		super(janCode, price, productName);
+	private SimpleStringProperty bookTitleProperty;
+	private SimpleStringProperty writerProperty;
+	private SimpleStringProperty publisherProperty;
 
+	public Book(String janCode, int price, int discount, String bookTitle, String writer,
+			String publisher, String googleID) {
+		super(janCode, price, discount);
+
+		this.bookTitle = bookTitle;
 		this.writer = writer;
 		this.publisher = publisher;
-		this.isbn10 = isbn10;
-		this.magazineCode = magazineCode;
 		this.googleID = googleID;
+
+		bookTitleProperty = new SimpleStringProperty(bookTitle);
+		writerProperty = new SimpleStringProperty(writer);
+		publisherProperty = new SimpleStringProperty(publisher);
 	}
 
 	public static Boolean isPrinting(long janCode) {
@@ -59,5 +67,29 @@ public class Book extends Product {
 			e.printStackTrace();
 			return false;
 		}
+	}
+
+	public String getBookTitleProperty() {
+		return bookTitleProperty.get();
+	}
+
+	public void setBookTitleProperty(String bookTitle) {
+		bookTitleProperty.set(bookTitle);
+	}
+
+	public String getWriterProperty() {
+		return writerProperty.get();
+	}
+
+	public void setWriterProperty(String writer) {
+		writerProperty.set(writer);
+	}
+
+	public String getPublisherProperty() {
+		return publisherProperty.get();
+	}
+
+	public void setPublisherProperty(String publisher) {
+		publisherProperty.set(publisher);
 	}
 }
