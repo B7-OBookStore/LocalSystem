@@ -36,7 +36,7 @@ public class Book extends Item {
 		publisherProperty = new SimpleStringProperty(publisher);
 	}
 
-	public static Boolean isPrinting(long janCode) {
+	public static Boolean isPrinting(String janCode) {
 		try {
 			URL url = new URL(
 					"http://www.books.or.jp/ResultList.aspx?scode=&searchtype=1&showcount=1&startindex=0&isbn="

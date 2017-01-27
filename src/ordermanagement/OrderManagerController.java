@@ -27,7 +27,7 @@ import javafx.scene.paint.Color;
 
 import common.Book;
 import common.Common;
-import common.OrderBook;
+import common.Request;
 import common.Store;
 
 public class OrderManagerController extends Common implements Initializable {
@@ -62,15 +62,15 @@ public class OrderManagerController extends Common implements Initializable {
 
 		try {
 			// データベースに問い合わせ
-			String sqlStr = "SELECT orderbookdetail.OrderNumber,orderbookdetail.OrderDetailNumber,CustomerNumber,Name,Phone,Mail,Contact,"
-					+ "orderbookdetail.JANCode,Price,ProductName,Writer,Publisher,ISBN10,MagazineCode,GoogleID,Num "
-					+ "FROM orderbookdetail "
-					+ "INNER JOIN orderbook ON orderbookdetail.OrderNumber = orderbook.OrderNumber "
-					+ "INNER JOIN product ON orderbookdetail.JANCode = product.JANCode "
-					+ "INNER JOIN book ON orderbookdetail.JANCode = book.JANCode "
-					+ "LEFT JOIN stock ON orderbookdetail.JANCode = stock.JANCode AND orderbook.StoreNumber = stock.StoreNumber "
-					+ "WHERE (DeliveryStatus = 0 OR DeliveryStatus IS NULL) "
-					+ "AND orderbook.StoreNumber = "
+			String sqlStr = "SELECT RequestDetail.RequestNum,RequestDetNum,UserNum,Name,Phone,ZipCode,Pref,City,Address,Apartment,"
+					+ "RequestDetail.JANCode,Price,Discount,BookTitle,Writer,Publisher,GoogleID,StockAmount "
+					+ "FROM RequestDetail "
+					+ "INNER JOIN Request ON RequestDetail.RequestNum = Request.RequestNum "
+					+ "INNER JOIN Item ON RequestDetail.JANCode = Item.JANCode "
+					+ "INNER JOIN Book ON RequestDetail.JANCode = Book.JANCode "
+					+ "LEFT JOIN Stock ON RequestDetail.JANCode = Stock.JANCode AND Request.StoreNum = Stock.StoreNum "
+					+ "WHERE (DeliveryStat = 0 OR DeliveryStat IS NULL) "
+					+ "AND Request.StoreNum = "
 					+ storeComboBox.getSelectionModel().getSelectedItem().storeNum;
 			ResultSet rs = stmt.executeQuery(sqlStr);
 
@@ -79,14 +79,14 @@ public class OrderManagerController extends Common implements Initializable {
 			} else {
 				do {
 					// オブジェクトを作る
-					OrderBook book = new OrderBook(rs.getLong("JANCode"), rs.getInt("Price"),
-							rs.getString("ProductName"), rs.getString("Writer"),
-							rs.getString("Publisher"), rs.getString("ISBN10"),
-							rs.getString("MagazineCode"), rs.getString("GoogleID"),
-							rs.getInt("OrderNumber"), rs.getInt("OrderDetailNumber"),
-							rs.getInt("CustomerNumber"), rs.getString("Name"),
-							rs.getString("Phone"), rs.getString("Mail"), rs.getInt("Contact"));
-					book.stock = rs.getInt("Num"); // 在庫数をセット
+					Book book = new Book(rs.getString("JANCode"), rs.getInt("Price"),
+							rs.getInt("Discount"), rs.getString("BookTitle"),
+							rs.getString("Writer"), rs.getString("Publisher"),
+							rs.getString("GoogleID"));
+					Request request = new Request(book, rs.getInt("RequestNum"),
+							rs.getInt("RequestDetNum"), rs.getInt("UserNum"), rs.getString("Name"),
+							rs.getString("Phone"));
+					book.stock = rs.getInt("StockAmount"); // 在庫数をセット
 
 					// レイアウト用のコンテナを作る
 					HBox hBox = new HBox(5);
@@ -113,32 +113,24 @@ public class OrderManagerController extends Common implements Initializable {
 						gridPane.add(new Label("顧客番号"), 0, 3);
 						gridPane.add(new Label("名前"), 0, 4);
 						gridPane.add(new Label("電話番号"), 0, 5);
-						gridPane.add(new Label("メールアドレス"), 0, 6);
-						gridPane.add(new Label("希望の連絡方法"), 0, 7);
-						gridPane.add(new Separator(), 0, 8, 2, 1);
-						gridPane.add(new Label("JANコード"), 0, 9);
-						gridPane.add(new Label("価格"), 0, 10);
-						gridPane.add(new Label("書名"), 0, 11);
-						gridPane.add(new Label("著者"), 0, 12);
-						gridPane.add(new Label("出版社"), 0, 13);
+						gridPane.add(new Separator(), 0, 6, 2, 1);
+						gridPane.add(new Label("JANコード"), 0, 7);
+						gridPane.add(new Label("価格"), 0, 8);
+						gridPane.add(new Label("書名"), 0, 9);
+						gridPane.add(new Label("著者"), 0, 10);
+						gridPane.add(new Label("出版社"), 0, 11);
 
 						// 内容部分を設定
-						gridPane.add(new Label(String.valueOf(book.orderNumber)), 1, 0);
-						gridPane.add(new Label(String.valueOf(book.orderDetailNumber)), 1, 1);
-						gridPane.add(new Label(String.valueOf(book.customerNumber)), 1, 3);
-						gridPane.add(new Label(book.name), 1, 4);
-						gridPane.add(new Label(book.phone), 1, 5);
-						gridPane.add(new Label(book.mail), 1, 6);
-						if (book.contact == 0) {
-							gridPane.add(new Label("メール"), 1, 7);
-						} else if (rs.getInt("Contact") == 1) {
-							gridPane.add(new Label("電話"), 1, 7);
-						}
-						gridPane.add(new Label(String.valueOf(book.janCode)), 1, 9);
-						gridPane.add(new Label("￥" + book.price), 1, 10);
-						gridPane.add(new Label(book.productName), 1, 11);
-						gridPane.add(new Label(book.writer), 1, 12);
-						gridPane.add(new Label(book.publisher), 1, 13);
+						gridPane.add(new Label(String.valueOf(request.requestNum)), 1, 0);
+						gridPane.add(new Label(String.valueOf(request.requestDetNum)), 1, 1);
+						gridPane.add(new Label(String.valueOf(request.userNum)), 1, 3);
+						gridPane.add(new Label(request.name), 1, 4);
+						gridPane.add(new Label(request.phone), 1, 5);
+						gridPane.add(new Label(String.valueOf(book.janCode)), 1, 7);
+						gridPane.add(new Label("￥" + book.price), 1, 8);
+						gridPane.add(new Label(book.bookTitle), 1, 9);
+						gridPane.add(new Label(book.writer), 1, 10);
+						gridPane.add(new Label(book.publisher), 1, 11);
 					}
 
 					// コンテナのスタイルを設定
@@ -146,6 +138,7 @@ public class OrderManagerController extends Common implements Initializable {
 					HBox.setHgrow(gridPane, Priority.ALWAYS);
 					gridPane.setHgap(20);
 					buttonBox.setAlignment(Pos.TOP_RIGHT);
+					toolBox.setMinWidth(80);
 					hBox.setMaxWidth(Double.MAX_VALUE);
 					hBox.setPadding(new Insets(10));
 					hBox.setStyle("-fx-background-color: #FFFFFF");
@@ -167,7 +160,7 @@ public class OrderManagerController extends Common implements Initializable {
 						stockLabel.setStyle("-fx-background-color:red");
 					} else {
 						// 在庫があるとき
-						stockLabel.setText("在庫有 (" + rs.getInt("Num") + ")");
+						stockLabel.setText("在庫有 (" + rs.getInt("StockAmount") + ")");
 						stockLabel.setStyle("-fx-background-color:green");
 					}
 
@@ -185,7 +178,7 @@ public class OrderManagerController extends Common implements Initializable {
 							printCheckButton.setStyle("-fx-background-color:#B8860B");
 						}
 					});
-					orderButton.setOnAction((ActionEvent) -> order(book));
+					orderButton.setOnAction((ActionEvent) -> order(request));
 
 					// コントロールをレイアウトに追加
 					buttonBox.getChildren().addAll(edit, remove);
@@ -203,19 +196,19 @@ public class OrderManagerController extends Common implements Initializable {
 	}
 
 	// 客注野郎に客注
-	void order(OrderBook book) {
+	void order(Request request) {
 		File file = new File("order.csv");
 		BufferedWriter bw;
 		try {
 			bw = new BufferedWriter(new FileWriter(file));
 
-			bw.write(book.name + ",");
-			bw.write(book.orderNumber + ",");
-			bw.write(book.orderDetailNumber + ",");
-			bw.write(book.publisher + ",");
-			bw.write(book.janCode + ",");
-			bw.write(book.productName + ",");
-			bw.write(book.writer + ",");
+			bw.write(request.name + ",");
+			bw.write(request.requestNum + ",");
+			bw.write(request.requestDetNum + ",");
+			bw.write(request.book.publisher + ",");
+			bw.write(request.book.janCode + ",");
+			bw.write(request.book.bookTitle + ",");
+			bw.write(request.book.writer + ",");
 			bw.write("1" + ",");
 
 			bw.newLine();
