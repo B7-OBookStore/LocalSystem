@@ -26,6 +26,7 @@ import javafx.stage.Window;
 import common.Book;
 import common.Common;
 import common.Item;
+import common.Other;
 import common.Store;
 
 public class CashRegisterController extends Common implements Initializable {
@@ -68,6 +69,20 @@ public class CashRegisterController extends Common implements Initializable {
 				.setCellValueFactory(new PropertyValueFactory<>("discountProperty"));
 
 		purchaseTable.setItems(items);
+
+		autoReload.play();
+	}
+
+	@Override
+	public void reload() {
+		try {
+			ResultSet rs = getRS("SELECT CURRENT_DATE");
+			if (rs.next()) {
+				clockLabel.setText(rs.getString("CURRENT_DATE"));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@FXML
@@ -112,7 +127,7 @@ public class CashRegisterController extends Common implements Initializable {
 			e.printStackTrace();
 		}
 
-		addItem(Long.parseLong(janCodeField.getText()));
+		addItem(janCodeField.getText());
 		janCodeField.clear();
 	}
 
@@ -162,7 +177,7 @@ public class CashRegisterController extends Common implements Initializable {
 				ResultSet rs = getRS(sqlStr);
 
 				if (rs.next()) {
-					addItem(rs.getLong("JANCode"));
+					addItem(rs.getString("JANCode"));
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -189,16 +204,24 @@ public class CashRegisterController extends Common implements Initializable {
 		stage.show();
 	}
 
-	void addItem(long janCode) {
+	void addItem(String janCode) {
 		try {
-			String sqlStr = "SELECT * FROM Item,Book WHERE Item.JANCode = Book.JANCode and Item.JANCode = "
-					+ janCode;
-			ResultSet rs = getRS(sqlStr);
+			ResultSet bookRS = getRS("SELECT * FROM Item,Book WHERE Item.JANCode = Book.JANCode and Item.JANCode = "
+					+ janCode);
 
-			if (rs.next()) {
-				items.add(new Book(rs.getString("JANCode"), rs.getInt("Price"), rs
-						.getInt("Discount"), rs.getString("BookTitle"), rs.getString("Writer"), rs
-						.getString("Publisher"), rs.getString("googleID")));
+			if (bookRS.next()) {
+				items.add(new Book(bookRS.getString("JANCode"), bookRS.getInt("Price"), bookRS
+						.getInt("Discount"), bookRS.getString("BookTitle"), bookRS
+						.getString("Writer"), bookRS.getString("Publisher"), bookRS
+						.getString("googleID")));
+			} else {
+				ResultSet otherRS = getRS("SELECT * FROM Item,Other WHERE Item.JANCode = Other.JANCode and Item.JANCode = "
+						+ janCode);
+				if (otherRS.next()) {
+					items.add(new Other(otherRS.getString("JANCode"), otherRS.getInt("Price"),
+							otherRS.getInt("Discount"), otherRS.getString("Name"), otherRS
+									.getString("Manufacturer"), otherRS.getString("Genre")));
+				}
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();

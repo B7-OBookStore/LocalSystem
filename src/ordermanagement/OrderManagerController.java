@@ -71,16 +71,16 @@ public class OrderManagerController extends Common implements Initializable {
 				.setCellValueFactory(new PropertyValueFactory<>("publisherProperty"));
 		replenishmentTableView.getColumns().get(4)
 				.setCellValueFactory(new PropertyValueFactory<>("amountProperty"));
-
 		viewOrder();
 
 		reload();
-		loadCSV();
 	}
 
 	@FXML
-	void reload() {
+	@Override
+	public void reload() {
 		reloadOrder();
+		loadCSV();
 	}
 
 	void reloadOrder() {

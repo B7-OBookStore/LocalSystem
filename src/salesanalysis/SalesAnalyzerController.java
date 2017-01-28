@@ -18,6 +18,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableView;
@@ -40,6 +41,7 @@ import common.Store;
 public class SalesAnalyzerController extends Common implements Initializable {
 	public TextField amountTextField;
 
+	public Label clockLabel;
 	public ComboBox<Store> storeComboBox;
 	public ComboBox<String> periodComboBox;
 	public TableView<Sale> recentTableView;
@@ -107,11 +109,17 @@ public class SalesAnalyzerController extends Common implements Initializable {
 				.setCellValueFactory(new PropertyValueFactory<>("amountProperty"));
 
 		reload();
-		loadCSV();
 	}
 
 	@FXML
-	void reload() {
+	@Override
+	public void reload() {
+		recentSales.clear();
+		popularSales.clear();
+		orderSales.clear();
+		writers.clear();
+		replenishmentOrders.clear();
+
 		try {
 			String sqlStr = "SELECT Sale.SaleDate,Age,SaleDetail.JANCode,SaleDetail.Price,SaleDetail.Discount,BookTitle,Writer,Publisher,GoogleID FROM SaleDetail "
 					+ "INNER JOIN Sale ON SaleDetail.SaleNum = Sale.SaleNum "
@@ -178,6 +186,8 @@ public class SalesAnalyzerController extends Common implements Initializable {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+
+		loadCSV();
 	}
 
 	void setTableColumn(TableView<Sale> recentTableView2) {
@@ -299,6 +309,8 @@ public class SalesAnalyzerController extends Common implements Initializable {
 			replenishmentOrders.add(new Order(book, Integer.parseInt(amountTextField.getText())));
 			break;
 		}
+
+		saveCSV();
 	}
 
 	void loadCSV() {

@@ -6,12 +6,16 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import javafx.animation.Animation.Status;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.util.Callback;
+import javafx.util.Duration;
 
 public class Common {
 
@@ -21,6 +25,8 @@ public class Common {
 
 	protected Connection con;
 	protected Statement stmt;
+
+	protected Timeline autoReload;
 
 	protected ObservableList<Store> stores = FXCollections.observableArrayList();
 
@@ -41,6 +47,18 @@ public class Common {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+		autoReload = new Timeline(new KeyFrame(new Duration(10000), e -> {
+			reload();
+		}));
+		autoReload.setCycleCount(Timeline.INDEFINITE);
+	}
+
+	public void enableAutoReload() {
+		if (autoReload.getStatus() == Status.STOPPED) {
+			autoReload.play();
+		} else {
+			autoReload.stop();
+		}
 	}
 
 	public void sqlConnect() throws SQLException {
@@ -55,6 +73,15 @@ public class Common {
 	public void sqlClose() throws SQLException {
 		con.close();
 		stmt.close();
+	}
+
+	@Override
+	protected Object clone() throws CloneNotSupportedException {
+		// TODO 自動生成されたメソッド・スタブ
+		return super.clone();
+	}
+
+	public void reload() {
 	}
 
 	public ResultSet getRS(String sql) throws SQLException {
