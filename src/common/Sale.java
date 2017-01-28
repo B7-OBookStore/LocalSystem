@@ -6,10 +6,10 @@ import javafx.beans.property.SimpleStringProperty;
 
 public class Sale {
 
-	Book book;
-	Date saleDate;
-	int age;
-	int num;
+	public Book book;
+	public Date saleDate;
+	public int age;
+	public int num;
 
 	private SimpleStringProperty janCodeProperty;
 	private SimpleStringProperty priceProperty;

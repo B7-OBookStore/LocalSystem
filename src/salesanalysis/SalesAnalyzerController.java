@@ -1,5 +1,11 @@
 package salesanalysis;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.sql.ResultSet;
@@ -13,7 +19,9 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -25,10 +33,13 @@ import org.w3c.dom.NodeList;
 
 import common.Book;
 import common.Common;
+import common.Order;
 import common.Sale;
 import common.Store;
 
 public class SalesAnalyzerController extends Common implements Initializable {
+	public TextField amountTextField;
+
 	public ComboBox<Store> storeComboBox;
 	public ComboBox<String> periodComboBox;
 	public TableView<Sale> recentTableView;
@@ -36,12 +47,15 @@ public class SalesAnalyzerController extends Common implements Initializable {
 	public TableView<Sale> orderTableView;
 	public TableView<Book> writerTableView;
 	public ListView<String> writerListView;
+	public TableView<Order> replenishmentTableView;
+	public TabPane tabPane;
 
 	ObservableList<Sale> recentSales = FXCollections.observableArrayList();
 	ObservableList<Sale> popularSales = FXCollections.observableArrayList();
 	ObservableList<Sale> orderSales = FXCollections.observableArrayList();
 	ObservableList<Book> writerBooks = FXCollections.observableArrayList();
 	ObservableList<String> writers = FXCollections.observableArrayList();
+	ObservableList<Order> replenishmentOrders = FXCollections.observableArrayList();
 
 	@Override
 	public void initialize(URL arg0, ResourceBundle arg1) {
@@ -59,6 +73,7 @@ public class SalesAnalyzerController extends Common implements Initializable {
 		orderTableView.setItems(orderSales);
 		writerTableView.setItems(writerBooks);
 		writerListView.setItems(writers);
+		replenishmentTableView.setItems(replenishmentOrders);
 
 		writerListView
 				.getSelectionModel()
@@ -86,7 +101,13 @@ public class SalesAnalyzerController extends Common implements Initializable {
 		writerTableView.getColumns().get(2)
 				.setCellValueFactory(new PropertyValueFactory<>("publisherProperty"));
 
+		replenishmentTableView.getColumns().get(0)
+				.setCellValueFactory(new PropertyValueFactory<>("bookTitleProperty"));
+		replenishmentTableView.getColumns().get(1)
+				.setCellValueFactory(new PropertyValueFactory<>("amountProperty"));
+
 		reload();
+		load();
 	}
 
 	@FXML
@@ -189,26 +210,45 @@ public class SalesAnalyzerController extends Common implements Initializable {
 
 				try {
 					String googleID = identifiers.item(0).getLastChild().getNodeValue();
-					String janCode = "0";
 
-					int price = 0;
-					NodeList prices = entry.getElementsByTagName("gbs:price");
-					for (int j = 0; j < prices.getLength(); j++) {
-						Element monies = (Element) prices.item(j);
-						Element money = (Element) monies.getElementsByTagName("gd:money").item(0);
+					for (int j = 0; j < identifiers.getLength(); j++) {
+						String identifier = identifiers.item(j).getTextContent();
+						if (identifier.matches("^ISBN:[0-9]{13}$")) {
+							String janCode = identifier.substring(5);
 
-						if (monies.getAttribute("type").equals("SuggestedRetailPrice")
-								&& money.getAttribute("currencyCode").equals("JPY")) {
-							price = (int) Double.parseDouble(money.getAttribute("amount"));
+							ResultSet rs = getRS("SELECT Price FROM Item WHERE JANCode=" + janCode);
+							int price = 0;
+
+							if (rs.next()) {
+								price = rs.getInt("Price");
+							} else {
+								NodeList prices = entry.getElementsByTagName("gbs:price");
+								for (int k = 0; k < prices.getLength(); k++) {
+									Element monies = (Element) prices.item(k);
+									Element money = (Element) monies.getElementsByTagName(
+											"gd:money").item(0);
+
+									if (monies.getAttribute("type").equals("SuggestedRetailPrice")
+											&& money.getAttribute("currencyCode").equals("JPY")) {
+										price = (int) Double.parseDouble(money
+												.getAttribute("amount"));
+
+									}
+								}
+							}
+
+							if (price != 0) {
+								String bookTitle = getElementString(entry, "dc:title", "Å@");
+								String writer = getElementString(entry, "dc:creator", ",");
+								String publisher = getElementString(entry, "dc:publisher", ",");
+
+								writerBooks.add(new Book(janCode, price, 0, bookTitle, writer,
+										publisher, googleID));
+							}
+
+							break;
 						}
 					}
-
-					String bookTitle = getElementString(entry, "dc:title");
-					String writer = getElementString(entry, "dc:creator");
-					String publisher = getElementString(entry, "dc:publisher");
-
-					writerBooks.add(new Book(janCode, price, 0, bookTitle, writer, publisher,
-							googleID));
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -219,16 +259,92 @@ public class SalesAnalyzerController extends Common implements Initializable {
 		}
 	}
 
-	String getElementString(Element element, String tagName) {
+	String getElementString(Element element, String tagName, String delimiter) {
 		String str = "";
 		NodeList nodeList = element.getElementsByTagName(tagName);
 
 		for (int i = 0; i < nodeList.getLength(); i++) {
 			if (i > 0)
-				str += "Å@";
+				str += delimiter;
 			str += nodeList.item(i).getLastChild().getNodeValue();
 		}
 
-		return str.trim();
+		if (str.endsWith(delimiter)) {
+			str = str.substring(0, str.lastIndexOf(delimiter));
+		}
+
+		return str;
+	}
+
+	@FXML
+	void addReplenishment() {
+		int index = tabPane.getSelectionModel().getSelectedIndex();
+		Book book;
+
+		switch (index) {
+		case 0:
+			book = recentTableView.getSelectionModel().getSelectedItem().book;
+			replenishmentOrders.add(new Order(book, Integer.parseInt(amountTextField.getText())));
+			break;
+		case 1:
+			book = popularTableView.getSelectionModel().getSelectedItem().book;
+			replenishmentOrders.add(new Order(book, Integer.parseInt(amountTextField.getText())));
+			break;
+		case 2:
+			book = orderTableView.getSelectionModel().getSelectedItem().book;
+			replenishmentOrders.add(new Order(book, Integer.parseInt(amountTextField.getText())));
+			break;
+		case 3:
+			book = writerTableView.getSelectionModel().getSelectedItem();
+			replenishmentOrders.add(new Order(book, Integer.parseInt(amountTextField.getText())));
+			break;
+		}
+	}
+
+	void load() {
+		File file = new File("order.csv");
+		BufferedReader br;
+
+		try {
+			br = new BufferedReader(new FileReader(file));
+
+			String line = "";
+			while ((line = br.readLine()) != null) {
+				String[] order = line.split(",");
+
+				Book book = new Book(order[0], Integer.valueOf(order[1]),
+						Integer.valueOf(order[2]), order[3], order[4], order[5], order[6]);
+				replenishmentOrders.add(new Order(book, Integer.valueOf(order[7])));
+			}
+			br.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@FXML
+	void save() {
+		File file = new File("order.csv");
+		BufferedWriter bw;
+
+		try {
+			bw = new BufferedWriter(new FileWriter(file));
+
+			for (Order order : replenishmentOrders) {
+				bw.write(order.book.janCode + ",");
+				bw.write(order.book.price + ",");
+				bw.write(order.book.discount + ",");
+				bw.write(order.book.bookTitle + ",");
+				bw.write(order.book.writer + ",");
+				bw.write(order.book.publisher + ",");
+				bw.write(order.book.googleID + ",");
+				bw.write(order.amount + "");
+				bw.newLine();
+			}
+
+			bw.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }

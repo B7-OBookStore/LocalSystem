@@ -207,7 +207,7 @@ public class OrderManagerController extends Common implements Initializable {
 
 	// ãqíçñÏòYÇ…ãqíç
 	void order(Request request) {
-		File file = new File("order.csv");
+		File file = new File("request.csv");
 		BufferedWriter bw;
 		try {
 			bw = new BufferedWriter(new FileWriter(file));
@@ -224,7 +224,7 @@ public class OrderManagerController extends Common implements Initializable {
 			bw.newLine();
 			bw.close();
 
-			String cmd = "cmd.exe /c start order.bat";
+			String cmd = "cmd.exe /c start request.bat";
 			Runtime.getRuntime().exec(cmd);
 		} catch (IOException e) {
 			e.printStackTrace();
