@@ -102,7 +102,7 @@
                   </ScrollPane>
                </content>
             </TitledPane>
-            <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#save" text="保存" />
+            <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#saveCSV" text="保存" />
          </children>
       </VBox>
    </right>

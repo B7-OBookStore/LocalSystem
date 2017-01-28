@@ -91,12 +91,13 @@
                <content>
                   <VBox alignment="TOP_RIGHT" spacing="3.0">
                      <children>
-                        <TableView>
+                        <TableView fx:id="replenishmentTableView">
                           <columns>
                             <TableColumn prefWidth="75.0" text="JANコード" />
                             <TableColumn prefWidth="75.0" text="書名" />
                               <TableColumn prefWidth="75.0" text="著者" />
                               <TableColumn prefWidth="75.0" text="出版社" />
+                              <TableColumn prefWidth="75.0" text="数量" />
                           </columns>
                            <columnResizePolicy>
                               <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
@@ -106,11 +107,12 @@
                            <children>
                               <HBox HBox.hgrow="ALWAYS">
                                  <children>
-                                    <TextField promptText="JANCode" />
-                                    <Button mnemonicParsing="false" text="追加" />
+                                    <TextField fx:id="janCodeField" promptText="JANコード" />
+                                    <TextField fx:id="amountField" prefWidth="70.0" promptText="数量" />
+                                    <Button mnemonicParsing="false" onAction="#addReplenishment" text="追加" />
                                  </children>
                               </HBox>
-                              <Button mnemonicParsing="false" text="一括補充発注" />
+                              <Button mnemonicParsing="false" onAction="#order" text="一括補充発注" />
                            </children>
                         </HBox>
                      </children>

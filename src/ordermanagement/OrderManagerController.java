@@ -1,7 +1,9 @@
 package ordermanagement;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
@@ -9,6 +11,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
@@ -19,6 +23,9 @@ import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Separator;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -28,6 +35,7 @@ import javafx.scene.paint.Color;
 
 import common.Book;
 import common.Common;
+import common.Order;
 import common.Request;
 import common.Store;
 
@@ -35,8 +43,12 @@ public class OrderManagerController extends Common implements Initializable {
 
 	public ScrollPane orderPane;
 	public ScrollPane replenishmentPane;
+	public TableView<Order> replenishmentTableView;
 	public ComboBox<Store> storeComboBox;
 	public VBox orderBox;
+	public TextField janCodeField;
+	public TextField amountField;
+	public ObservableList<Order> replenishmentOrders = FXCollections.observableArrayList();
 
 	@Override
 	public void initialize(URL arg0, ResourceBundle arg1) {
@@ -47,9 +59,23 @@ public class OrderManagerController extends Common implements Initializable {
 
 		orderPane.managedProperty().bind(orderPane.visibleProperty());
 		replenishmentPane.managedProperty().bind(replenishmentPane.visibleProperty());
+		replenishmentTableView.setItems(replenishmentOrders);
+
+		replenishmentTableView.getColumns().get(0)
+				.setCellValueFactory(new PropertyValueFactory<>("janCodeProperty"));
+		replenishmentTableView.getColumns().get(1)
+				.setCellValueFactory(new PropertyValueFactory<>("bookTitleProperty"));
+		replenishmentTableView.getColumns().get(2)
+				.setCellValueFactory(new PropertyValueFactory<>("writerProperty"));
+		replenishmentTableView.getColumns().get(3)
+				.setCellValueFactory(new PropertyValueFactory<>("publisherProperty"));
+		replenishmentTableView.getColumns().get(4)
+				.setCellValueFactory(new PropertyValueFactory<>("amountProperty"));
+
 		viewOrder();
 
 		reload();
+		loadCSV();
 	}
 
 	@FXML
@@ -186,7 +212,7 @@ public class OrderManagerController extends Common implements Initializable {
 							printCheckButton.setStyle("-fx-background-color:#B8860B");
 						}
 					});
-					orderButton.setOnAction((ActionEvent) -> order(request));
+					orderButton.setOnAction((ActionEvent) -> request(request));
 
 					// コントロールをレイアウトに追加
 					buttonBox.getChildren().addAll(edit, remove);
@@ -206,7 +232,7 @@ public class OrderManagerController extends Common implements Initializable {
 	}
 
 	// 客注野郎に客注
-	void order(Request request) {
+	void request(Request request) {
 		File file = new File("request.csv");
 		BufferedWriter bw;
 		try {
@@ -226,6 +252,80 @@ public class OrderManagerController extends Common implements Initializable {
 
 			String cmd = "cmd.exe /c start request.bat";
 			Runtime.getRuntime().exec(cmd);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@FXML
+	void order() {
+		try {
+			String cmd = "cmd.exe /c start order.bat";
+			Runtime.getRuntime().exec(cmd);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@FXML
+	void addReplenishment() {
+		try {
+			ResultSet rs = getRS("SELECT Book.JANCode,Price,Discount,BookTitle,Writer,Publisher,GoogleID FROM Item "
+					+ "INNER JOIN Book ON Item.JANCode = Book.JANCode WHERE Book.JANCode="
+					+ janCodeField.getText());
+			if (rs.next()) {
+				Book book = new Book(rs.getString("JANCode"), rs.getInt("Price"),
+						rs.getInt("Discount"), rs.getString("BookTitle"), rs.getString("Writer"),
+						rs.getString("publisher"), rs.getString("GoogleID"));
+				replenishmentOrders.add(new Order(book, Integer.valueOf(amountField.getText())));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		saveCSV();
+	}
+
+	void loadCSV() {
+		File file = new File("order.csv");
+		BufferedReader br;
+
+		try {
+			br = new BufferedReader(new FileReader(file));
+
+			String line = "";
+			while ((line = br.readLine()) != null) {
+				String[] order = line.split(",");
+
+				Book book = new Book(order[0], Integer.valueOf(order[1]),
+						Integer.valueOf(order[2]), order[3], order[4], order[5], order[6]);
+				replenishmentOrders.add(new Order(book, Integer.valueOf(order[7])));
+			}
+			br.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	void saveCSV() {
+		File file = new File("order.csv");
+		BufferedWriter bw;
+
+		try {
+			bw = new BufferedWriter(new FileWriter(file));
+
+			for (Order order : replenishmentOrders) {
+				bw.write(order.book.janCode + ",");
+				bw.write(order.book.price + ",");
+				bw.write(order.book.discount + ",");
+				bw.write(order.book.bookTitle + ",");
+				bw.write(order.book.writer + ",");
+				bw.write(order.book.publisher + ",");
+				bw.write(order.book.googleID + ",");
+				bw.write(order.amount + "");
+				bw.newLine();
+			}
+
+			bw.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

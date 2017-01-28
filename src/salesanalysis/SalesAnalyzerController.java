@@ -107,7 +107,7 @@ public class SalesAnalyzerController extends Common implements Initializable {
 				.setCellValueFactory(new PropertyValueFactory<>("amountProperty"));
 
 		reload();
-		load();
+		loadCSV();
 	}
 
 	@FXML
@@ -301,7 +301,7 @@ public class SalesAnalyzerController extends Common implements Initializable {
 		}
 	}
 
-	void load() {
+	void loadCSV() {
 		File file = new File("order.csv");
 		BufferedReader br;
 
@@ -323,7 +323,7 @@ public class SalesAnalyzerController extends Common implements Initializable {
 	}
 
 	@FXML
-	void save() {
+	void saveCSV() {
 		File file = new File("order.csv");
 		BufferedWriter bw;
 
