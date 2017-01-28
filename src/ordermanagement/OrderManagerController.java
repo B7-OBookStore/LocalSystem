@@ -19,6 +19,7 @@ import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Separator;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -72,7 +73,7 @@ public class OrderManagerController extends Common implements Initializable {
 					+ "WHERE (DeliveryStat = 0 OR DeliveryStat IS NULL) "
 					+ "AND Request.StoreNum = "
 					+ storeComboBox.getSelectionModel().getSelectedItem().storeNum;
-			ResultSet rs = stmt.executeQuery(sqlStr);
+			ResultSet rs = getRS(sqlStr);
 
 			if (!rs.next()) {
 				orderBox.getChildren().add(new Label("åªç›ì¸Ç¡ÇƒÇ¢ÇÈãqíçÇÕÇ†ÇËÇ‹ÇπÇÒ"));
@@ -127,7 +128,13 @@ public class OrderManagerController extends Common implements Initializable {
 						gridPane.add(new Label(request.name), 1, 4);
 						gridPane.add(new Label(request.phone), 1, 5);
 						gridPane.add(new Label(String.valueOf(book.janCode)), 1, 7);
-						gridPane.add(new Label("Åè" + book.price), 1, 8);
+						if (book.price == 0) {
+							Label priceLabel = new Label("Åè(ìoò^ÇµÇƒÇ≠ÇæÇ≥Ç¢)");
+							priceLabel.setTextFill(Color.RED);
+							gridPane.add(priceLabel, 1, 8);
+						} else {
+							gridPane.add(new Label("Åè" + book.price), 1, 8);
+						}
 						gridPane.add(new Label(book.bookTitle), 1, 9);
 						gridPane.add(new Label(book.writer), 1, 10);
 						gridPane.add(new Label(book.publisher), 1, 11);
@@ -137,6 +144,7 @@ public class OrderManagerController extends Common implements Initializable {
 					VBox.setVgrow(buttonBox, Priority.ALWAYS);
 					HBox.setHgrow(gridPane, Priority.ALWAYS);
 					gridPane.setHgap(20);
+					gridPane.getColumnConstraints().add(new ColumnConstraints(110));
 					buttonBox.setAlignment(Pos.TOP_RIGHT);
 					toolBox.setMinWidth(80);
 					hBox.setMaxWidth(Double.MAX_VALUE);
@@ -189,6 +197,8 @@ public class OrderManagerController extends Common implements Initializable {
 					toolBox.getChildren().addAll(buttonBox, actionBox);
 					orderBox.getChildren().add(hBox);
 				} while (rs.next());
+				Button addButton = new Button("\u2795í«â¡");
+				orderBox.getChildren().add(addButton);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();

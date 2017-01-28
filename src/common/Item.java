@@ -16,7 +16,7 @@ public class Item {
 		this.janCode = janCode;
 		this.price = price;
 
-		janCodeProperty = new SimpleStringProperty(String.valueOf(janCode));
+		janCodeProperty = new SimpleStringProperty(janCode);
 		priceProperty = new SimpleStringProperty(String.valueOf(price));
 		discountProperty = new SimpleStringProperty(String.valueOf(discount));
 	}

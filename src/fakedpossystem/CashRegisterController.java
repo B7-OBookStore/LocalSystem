@@ -262,6 +262,15 @@ public class CashRegisterController extends Common implements Initializable {
 			}
 		}
 
+		try {
+			String sqlStr = "UPDATE Request,(SELECT DISTINCT RequestNum FROM Request "
+					+ "WHERE RequestNum NOT IN (SELECT RequestNum FROM RequestDetail WHERE DeliveryStat<>4))Sub "
+					+ "SET Request.ReceiptStat = true WHERE Request.RequestNum=Sub.RequestNum";
+			stmt.executeUpdate(sqlStr);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
 		changeLabel.setText(String.valueOf(change));
 		cashField.clear();
 		ageField.clear();

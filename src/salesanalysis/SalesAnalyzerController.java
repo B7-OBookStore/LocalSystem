@@ -25,20 +25,21 @@ import org.w3c.dom.NodeList;
 
 import common.Book;
 import common.Common;
+import common.Sale;
 import common.Store;
 
 public class SalesAnalyzerController extends Common implements Initializable {
 	public ComboBox<Store> storeComboBox;
 	public ComboBox<String> periodComboBox;
-	public TableView<Book> recentTableView;
-	public TableView<Book> popularTableView;
-	public TableView<Book> orderTableView;
+	public TableView<Sale> recentTableView;
+	public TableView<Sale> popularTableView;
+	public TableView<Sale> orderTableView;
 	public TableView<Book> writerTableView;
 	public ListView<String> writerListView;
 
-	ObservableList<Book> recentBooks = FXCollections.observableArrayList();
-	ObservableList<Book> popularBooks = FXCollections.observableArrayList();
-	ObservableList<Book> orderBooks = FXCollections.observableArrayList();
+	ObservableList<Sale> recentSales = FXCollections.observableArrayList();
+	ObservableList<Sale> popularSales = FXCollections.observableArrayList();
+	ObservableList<Sale> orderSales = FXCollections.observableArrayList();
 	ObservableList<Book> writerBooks = FXCollections.observableArrayList();
 	ObservableList<String> writers = FXCollections.observableArrayList();
 
@@ -53,9 +54,9 @@ public class SalesAnalyzerController extends Common implements Initializable {
 		periodComboBox.setItems(periodList);
 		periodComboBox.getSelectionModel().selectFirst();
 
-		recentTableView.setItems(recentBooks);
-		popularTableView.setItems(popularBooks);
-		orderTableView.setItems(orderBooks);
+		recentTableView.setItems(recentSales);
+		popularTableView.setItems(popularSales);
+		orderTableView.setItems(orderSales);
 		writerTableView.setItems(writerBooks);
 		writerListView.setItems(writers);
 
@@ -71,10 +72,17 @@ public class SalesAnalyzerController extends Common implements Initializable {
 		setTableColumn(popularTableView);
 		setTableColumn(orderTableView);
 
+		recentTableView.getColumns().get(4)
+				.setCellValueFactory(new PropertyValueFactory<>("saleDateProperty"));
+		popularTableView.getColumns().get(4)
+				.setCellValueFactory(new PropertyValueFactory<>("numProperty"));
+		orderTableView.getColumns().get(4)
+				.setCellValueFactory(new PropertyValueFactory<>("numProperty"));
+
 		writerTableView.getColumns().get(0)
 				.setCellValueFactory(new PropertyValueFactory<>("janCodeProperty"));
 		writerTableView.getColumns().get(1)
-				.setCellValueFactory(new PropertyValueFactory<>("titleProperty"));
+				.setCellValueFactory(new PropertyValueFactory<>("bookTitleProperty"));
 		writerTableView.getColumns().get(2)
 				.setCellValueFactory(new PropertyValueFactory<>("publisherProperty"));
 
@@ -84,57 +92,61 @@ public class SalesAnalyzerController extends Common implements Initializable {
 	@FXML
 	void reload() {
 		try {
-			String sqlStr = "SELECT saledetail.JANCode,saledetail.Price,ProductName,Writer,Publisher,ISBN10,MagazineCode,GoogleID FROM saledetail "
-					+ "INNER JOIN product ON saledetail.JANCode = product.JANCode "
-					+ "INNER JOIN book ON saledetail.JANCode = book.JANCode "
-					+ "GROUP BY saledetail.JANCode ORDER BY SaleDate DESC";
+			String sqlStr = "SELECT Sale.SaleDate,Age,SaleDetail.JANCode,SaleDetail.Price,SaleDetail.Discount,BookTitle,Writer,Publisher,GoogleID FROM SaleDetail "
+					+ "INNER JOIN Sale ON SaleDetail.SaleNum = Sale.SaleNum "
+					+ "INNER JOIN Item ON SaleDetail.JANCode = Item.JANCode "
+					+ "INNER JOIN Book ON SaleDetail.JANCode = Book.JANCode "
+					+ "GROUP BY SaleDetail.JANCode ORDER BY SaleDate DESC";
 			ResultSet rs = stmt.executeQuery(sqlStr);
 
 			while (rs.next()) {
-				recentBooks.add(new Book(rs.getLong("JANCode"), rs.getInt("Price"), rs
-						.getString("ProductName"), rs.getString("Writer"), rs
-						.getString("Publisher"), rs.getString("ISBN10"), rs
-						.getString("MagazineCode"), rs.getString("GoogleID")));
+				Book book = new Book(rs.getString("JANCode"), rs.getInt("Price"),
+						rs.getInt("Discount"), rs.getString("BookTitle"), rs.getString("Writer"),
+						rs.getString("Publisher"), rs.getString("GoogleID"));
+				recentSales.add(new Sale(book, rs.getDate("SaleDate"), rs.getInt("Age"), 1));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		try {
-			String sqlStr = "SELECT saledetail.JANCode,saledetail.Price,ProductName,Writer,Publisher,ISBN10,MagazineCode,GoogleID FROM saledetail "
-					+ "INNER JOIN product ON saledetail.JANCode = product.JANCode "
-					+ "INNER JOIN book ON saledetail.JANCode = book.JANCode "
-					+ "GROUP BY saledetail.JANCode ORDER BY count(*) DESC";
+			String sqlStr = "SELECT Sale.SaleDate,Age,SaleDetail.JANCode,SaleDetail.Price,SaleDetail.Discount,BookTitle,Writer,Publisher,GoogleID,COUNT(*) AS Count FROM SaleDetail "
+					+ "INNER JOIN Sale ON SaleDetail.SaleNum = Sale.SaleNum "
+					+ "INNER JOIN Item ON SaleDetail.JANCode = Item.JANCode "
+					+ "INNER JOIN Book ON SaleDetail.JANCode = Book.JANCode "
+					+ "GROUP BY SaleDetail.JANCode ORDER BY Count DESC";
 			ResultSet rs = stmt.executeQuery(sqlStr);
 
 			while (rs.next()) {
-				popularBooks.add(new Book(rs.getLong("JANCode"), rs.getInt("Price"), rs
-						.getString("ProductName"), rs.getString("Writer"), rs
-						.getString("Publisher"), rs.getString("ISBN10"), rs
-						.getString("MagazineCode"), rs.getString("GoogleID")));
+				Book book = new Book(rs.getString("JANCode"), rs.getInt("Price"),
+						rs.getInt("Discount"), rs.getString("BookTitle"), rs.getString("Writer"),
+						rs.getString("Publisher"), rs.getString("GoogleID"));
+				popularSales.add(new Sale(book, rs.getDate("SaleDate"), rs.getInt("Age"), rs
+						.getInt("Count")));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		try {
-			String sqlStr = "SELECT orderbookdetail.JANCode,Price,ProductName,Writer,Publisher,ISBN10,MagazineCode,GoogleID FROM orderbookdetail "
-					+ "INNER JOIN product ON orderbookdetail.JANCode = product.JANCode "
-					+ "INNER JOIN book ON orderbookdetail.JANCode = book.JANCode "
-					+ "GROUP BY orderbookdetail.JANCode ORDER BY count(*) DESC";
+			String sqlStr = "SELECT ReceiptLimit,RequestDetail.JANCode,Price,Discount,BookTitle,Writer,Publisher,GoogleID,COUNT(*) AS Count FROM RequestDetail "
+					+ "INNER JOIN Request ON RequestDetail.RequestNum = Request.RequestNum "
+					+ "INNER JOIN Item ON RequestDetail.JANCode = Item.JANCode "
+					+ "INNER JOIN Book ON RequestDetail.JANCode = Book.JANCode "
+					+ "GROUP BY RequestDetail.JANCode ORDER BY Count DESC";
 			ResultSet rs = stmt.executeQuery(sqlStr);
 
 			while (rs.next()) {
-				orderBooks.add(new Book(rs.getLong("JANCode"), rs.getInt("Price"), rs
-						.getString("ProductName"), rs.getString("Writer"), rs
-						.getString("Publisher"), rs.getString("ISBN10"), rs
-						.getString("MagazineCode"), rs.getString("GoogleID")));
+				Book book = new Book(rs.getString("JANCode"), rs.getInt("Price"),
+						rs.getInt("Discount"), rs.getString("BookTitle"), rs.getString("Writer"),
+						rs.getString("Publisher"), rs.getString("GoogleID"));
+				orderSales.add(new Sale(book, rs.getDate("ReceiptLimit"), 0, rs.getInt("Count")));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		try {
-			String sqlStr = "SELECT Writer FROM saledetail "
-					+ "INNER JOIN product ON saledetail.JANCode = product.JANCode "
-					+ "INNER JOIN book ON saledetail.JANCode = book.JANCode "
+			String sqlStr = "SELECT Writer FROM SaleDetail "
+					+ "INNER JOIN Item ON SaleDetail.JANCode = Item.JANCode "
+					+ "INNER JOIN book ON SaleDetail.JANCode = Book.JANCode "
 					+ "WHERE Writer IS NOT NULL " + "GROUP BY Writer ORDER BY count(*) DESC";
 
 			ResultSet rs = stmt.executeQuery(sqlStr);
@@ -147,14 +159,14 @@ public class SalesAnalyzerController extends Common implements Initializable {
 		}
 	}
 
-	void setTableColumn(TableView<Book> tableView) {
-		tableView.getColumns().get(0)
+	void setTableColumn(TableView<Sale> recentTableView2) {
+		recentTableView2.getColumns().get(0)
 				.setCellValueFactory(new PropertyValueFactory<>("janCodeProperty"));
-		tableView.getColumns().get(1)
-				.setCellValueFactory(new PropertyValueFactory<>("titleProperty"));
-		tableView.getColumns().get(2)
+		recentTableView2.getColumns().get(1)
+				.setCellValueFactory(new PropertyValueFactory<>("bookTitleProperty"));
+		recentTableView2.getColumns().get(2)
 				.setCellValueFactory(new PropertyValueFactory<>("writerProperty"));
-		tableView.getColumns().get(3)
+		recentTableView2.getColumns().get(3)
 				.setCellValueFactory(new PropertyValueFactory<>("publisherProperty"));
 	}
 
@@ -177,27 +189,26 @@ public class SalesAnalyzerController extends Common implements Initializable {
 
 				try {
 					String googleID = identifiers.item(0).getLastChild().getNodeValue();
-					long janCode = 1L;
-					String isbn10 = "";
+					String janCode = "0";
 
 					int price = 0;
-					/*NodeList prices = entry.getElementsByTagName("gbs:price");
+					NodeList prices = entry.getElementsByTagName("gbs:price");
 					for (int j = 0; j < prices.getLength(); j++) {
 						Element monies = (Element) prices.item(j);
-						Element money = (Element) monies.getElementsByTagName("money").item(0);
+						Element money = (Element) monies.getElementsByTagName("gd:money").item(0);
 
 						if (monies.getAttribute("type").equals("SuggestedRetailPrice")
 								&& money.getAttribute("currencyCode").equals("JPY")) {
-							price = Integer.parseInt(money.getNodeValue());
+							price = (int) Double.parseDouble(money.getAttribute("amount"));
 						}
-					}*/
+					}
 
-					String productName = getElementString(entry, "dc:title");
+					String bookTitle = getElementString(entry, "dc:title");
 					String writer = getElementString(entry, "dc:creator");
 					String publisher = getElementString(entry, "dc:publisher");
 
-					writerBooks.add(new Book(janCode, price, productName, writer, publisher,
-							isbn10, null, googleID));
+					writerBooks.add(new Book(janCode, price, 0, bookTitle, writer, publisher,
+							googleID));
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
