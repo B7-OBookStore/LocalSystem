@@ -86,6 +86,7 @@ public class OrderManagerController extends Common implements Initializable {
 	void reloadOrder() {
 		// 客注画面をクリア
 		orderBox.getChildren().clear();
+		replenishmentOrders.clear();
 
 		try {
 			// データベースに問い合わせ
@@ -318,12 +319,22 @@ public class OrderManagerController extends Common implements Initializable {
 				Book book = new Book(rs.getString("JANCode"), rs.getInt("Price"),
 						rs.getInt("Discount"), rs.getString("BookTitle"), rs.getString("Writer"),
 						rs.getString("publisher"), rs.getString("GoogleID"));
-				replenishmentOrders.add(new Order(book, Integer.valueOf(amountField.getText())));
+				addReplenishmentList(book, Integer.valueOf(amountField.getText()));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		saveCSV();
+	}
+
+	void addReplenishmentList(Book book, int amount) {
+		for (Order order : replenishmentOrders) {
+			if (order.book.janCode.equals(book.janCode)) {
+				order.amount += amount;
+				return;
+			}
+		}
+		replenishmentOrders.add(new Order(book, amount));
 	}
 
 	void loadCSV() {
@@ -335,7 +346,7 @@ public class OrderManagerController extends Common implements Initializable {
 
 			String line = "";
 			while ((line = br.readLine()) != null) {
-				String[] order = line.split(",");
+				String[] order = line.split("\t");
 
 				Book book = new Book(order[0], Integer.valueOf(order[1]),
 						Integer.valueOf(order[2]), order[3], order[4], order[5], order[6]);
@@ -355,13 +366,13 @@ public class OrderManagerController extends Common implements Initializable {
 			bw = new BufferedWriter(new FileWriter(file));
 
 			for (Order order : replenishmentOrders) {
-				bw.write(order.book.janCode + ",");
-				bw.write(order.book.price + ",");
-				bw.write(order.book.discount + ",");
-				bw.write(order.book.bookTitle + ",");
-				bw.write(order.book.writer + ",");
-				bw.write(order.book.publisher + ",");
-				bw.write(order.book.googleID + ",");
+				bw.write(order.book.janCode + "\t");
+				bw.write(order.book.price + "\t");
+				bw.write(order.book.discount + "\t");
+				bw.write(order.book.bookTitle + "\t");
+				bw.write(order.book.writer + "\t");
+				bw.write(order.book.publisher + "\t");
+				bw.write(order.book.googleID + "\t");
 				bw.write(order.amount + "");
 				bw.newLine();
 			}

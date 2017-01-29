@@ -131,7 +131,8 @@ public class BooktterController extends Common implements Initializable {
 					+ "INNER JOIN Book ON OrderedDetail.JANCode=Book.JANCode "
 					+ "WHERE Ordered.StoreNum="
 					+ storeComboBox.getSelectionModel().getSelectedItem().storeNum
-					+ " GROUP BY OrderedDetail.JANCode ORDER BY Ordered.OrderNum DESC";
+					+ " AND DeliveryStat=4 "
+					+ "GROUP BY OrderedDetail.JANCode ORDER BY Ordered.OrderNum DESC";
 			ResultSet rs = stmt.executeQuery(sqlStr);
 
 			while (rs.next()) {
@@ -193,7 +194,9 @@ public class BooktterController extends Common implements Initializable {
 	@FXML
 	void tweet() {
 		StatusUpdate su = new StatusUpdate(tweetArea.getText());
-		su.setMedia(tweetImgFile);
+		if (tweetImgFile != null) {
+			su.setMedia(tweetImgFile);
+		}
 		try {
 			twitter.updateStatus(su);
 		} catch (TwitterException e) {

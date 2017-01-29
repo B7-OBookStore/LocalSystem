@@ -128,7 +128,7 @@ public class SalesAnalyzerController extends Common implements Initializable {
 					+ "WHERE SaleDetail.StoreNum="
 					+ storeComboBox.getSelectionModel().getSelectedItem().storeNum
 					+ " GROUP BY SaleDetail.JANCode ORDER BY SaleDate DESC";
-			ResultSet rs = stmt.executeQuery(sqlStr);
+			ResultSet rs = getRS(sqlStr);
 
 			while (rs.next()) {
 				Book book = new Book(rs.getString("JANCode"), rs.getInt("Price"),
@@ -147,7 +147,7 @@ public class SalesAnalyzerController extends Common implements Initializable {
 					+ "WHERE SaleDetail.StoreNum="
 					+ storeComboBox.getSelectionModel().getSelectedItem().storeNum
 					+ " GROUP BY SaleDetail.JANCode ORDER BY Count DESC";
-			ResultSet rs = stmt.executeQuery(sqlStr);
+			ResultSet rs = getRS(sqlStr);
 
 			while (rs.next()) {
 				Book book = new Book(rs.getString("JANCode"), rs.getInt("Price"),
@@ -167,7 +167,7 @@ public class SalesAnalyzerController extends Common implements Initializable {
 					+ "WHERE Request.StoreNum="
 					+ storeComboBox.getSelectionModel().getSelectedItem().storeNum
 					+ " GROUP BY RequestDetail.JANCode ORDER BY Count DESC";
-			ResultSet rs = stmt.executeQuery(sqlStr);
+			ResultSet rs = getRS(sqlStr);
 
 			while (rs.next()) {
 				Book book = new Book(rs.getString("JANCode"), rs.getInt("Price"),
@@ -186,7 +186,7 @@ public class SalesAnalyzerController extends Common implements Initializable {
 					+ storeComboBox.getSelectionModel().getSelectedItem().storeNum
 					+ " GROUP BY Writer ORDER BY count(*) DESC";
 
-			ResultSet rs = stmt.executeQuery(sqlStr);
+			ResultSet rs = getRS(sqlStr);
 
 			while (rs.next()) {
 				writers.add(rs.getString("Writer"));
@@ -302,23 +302,33 @@ public class SalesAnalyzerController extends Common implements Initializable {
 		switch (index) {
 		case 0:
 			book = recentTableView.getSelectionModel().getSelectedItem().book;
-			replenishmentOrders.add(new Order(book, Integer.parseInt(amountTextField.getText())));
+			addReplenishmentList(book, Integer.parseInt(amountTextField.getText()));
 			break;
 		case 1:
 			book = popularTableView.getSelectionModel().getSelectedItem().book;
-			replenishmentOrders.add(new Order(book, Integer.parseInt(amountTextField.getText())));
+			addReplenishmentList(book, Integer.parseInt(amountTextField.getText()));
 			break;
 		case 2:
 			book = orderTableView.getSelectionModel().getSelectedItem().book;
-			replenishmentOrders.add(new Order(book, Integer.parseInt(amountTextField.getText())));
+			addReplenishmentList(book, Integer.parseInt(amountTextField.getText()));
 			break;
 		case 3:
 			book = writerTableView.getSelectionModel().getSelectedItem();
-			replenishmentOrders.add(new Order(book, Integer.parseInt(amountTextField.getText())));
+			addReplenishmentList(book, Integer.parseInt(amountTextField.getText()));
 			break;
 		}
 
 		saveCSV();
+	}
+
+	void addReplenishmentList(Book book, int amount) {
+		for (Order order : replenishmentOrders) {
+			if (order.book.janCode.equals(book.janCode)) {
+				order.amount += amount;
+				return;
+			}
+		}
+		replenishmentOrders.add(new Order(book, amount));
 	}
 
 	void loadCSV() {
@@ -330,7 +340,7 @@ public class SalesAnalyzerController extends Common implements Initializable {
 
 			String line = "";
 			while ((line = br.readLine()) != null) {
-				String[] order = line.split(",");
+				String[] order = line.split("\t");
 
 				Book book = new Book(order[0], Integer.valueOf(order[1]),
 						Integer.valueOf(order[2]), order[3], order[4], order[5], order[6]);
@@ -351,13 +361,13 @@ public class SalesAnalyzerController extends Common implements Initializable {
 			bw = new BufferedWriter(new FileWriter(file));
 
 			for (Order order : replenishmentOrders) {
-				bw.write(order.book.janCode + ",");
-				bw.write(order.book.price + ",");
-				bw.write(order.book.discount + ",");
-				bw.write(order.book.bookTitle + ",");
-				bw.write(order.book.writer + ",");
-				bw.write(order.book.publisher + ",");
-				bw.write(order.book.googleID + ",");
+				bw.write(order.book.janCode + "\t");
+				bw.write(order.book.price + "\t");
+				bw.write(order.book.discount + "\t");
+				bw.write(order.book.bookTitle + "\t");
+				bw.write(order.book.writer + "\t");
+				bw.write(order.book.publisher + "\t");
+				bw.write(order.book.googleID + "\t");
 				bw.write(order.amount + "");
 				bw.newLine();
 			}

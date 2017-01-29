@@ -1,28 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.AreaChart?>
 <?import javafx.scene.chart.CategoryAxis?>
-<?import javafx.scene.chart.LineChart?>
 <?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="480.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="salesanalysis.SalesAnalyzerController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="480.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="accountingmanagement.AccountingManagerController">
    <top>
       <HBox alignment="BOTTOM_CENTER" style="-fx-background-color: #8B4513;" BorderPane.alignment="CENTER">
          <children>
-            <Label maxWidth="1.7976931348623157E308" text="O書店販売分析システム" textFill="WHITE" HBox.hgrow="ALWAYS">
+            <Label maxWidth="1.7976931348623157E308" text="O書店会計管理システム" textFill="WHITE" HBox.hgrow="ALWAYS">
                <font>
                   <Font size="24.0" />
                </font>
@@ -37,12 +40,24 @@
    <left>
       <VBox prefWidth="150.0" BorderPane.alignment="CENTER">
          <children>
+            <VBox spacing="5.0">
+               <children>
+                  <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="40.0" text="🖶 全て印刷" />
+                  <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="40.0" text="📧 店舗に連絡" />
+                  <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="40.0" text="📧 外商に連絡" />
+               </children>
+            </VBox>
             <VBox alignment="BOTTOM_CENTER" spacing="10.0" VBox.vgrow="ALWAYS">
                <children>
+                  <RadioButton fx:id="allButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#reload" text="全体" />
+                  <RadioButton fx:id="storeButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#reload">
+                     <graphic>
+                        <ComboBox fx:id="storeComboBox" maxWidth="1.7976931348623157E308" onAction="#reload" prefWidth="100.0" />
+                     </graphic>
+                  </RadioButton>
                   <VBox spacing="3.0">
                      <children>
                         <Label text="店舗" />
-                        <ComboBox fx:id="storeComboBox" maxWidth="1.7976931348623157E308" onAction="#reload" />
                      </children>
                   </VBox>
                   <VBox spacing="3.0">
@@ -79,15 +94,15 @@
                      <content>
                         <VBox>
                            <children>
-                              <LineChart>
+                              <AreaChart fx:id="proceedChart">
                                 <xAxis>
                                   <CategoryAxis side="BOTTOM" />
                                 </xAxis>
                                 <yAxis>
                                   <NumberAxis side="LEFT" />
                                 </yAxis>
-                              </LineChart>
-                              <TableView prefHeight="200.0" prefWidth="200.0">
+                              </AreaChart>
+                              <TableView fx:id="proceedTableView" prefHeight="200.0" prefWidth="200.0">
                                 <columns>
                                   <TableColumn prefWidth="75.0" text="日付" />
                                   <TableColumn prefWidth="75.0" text="売上高" />
@@ -102,6 +117,26 @@
                   </ScrollPane>
                </content>
           </Tab>
+            <Tab text="給与計算">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+              </content>
+            </Tab>
+            <Tab text="資金繰り表">
+               <content>
+                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+               </content>
+            </Tab>
+            <Tab text="現金出納">
+               <content>
+                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+               </content>
+            </Tab>
+            <Tab text="決算書作成">
+               <content>
+                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+               </content>
+            </Tab>
         </tabs>
       </TabPane>
    </center>
