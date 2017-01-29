@@ -259,12 +259,53 @@ public class OrderManagerController extends Common implements Initializable {
 
 	@FXML
 	void order() {
+		int orderNum = 0;
+		try {
+			ResultSet rs = getRS("SELECT COUNT(*) FROM Ordered WHERE StoreNum="
+					+ storeComboBox.getSelectionModel().getSelectedItem().storeNum);
+			if (rs.next()) {
+				orderNum = rs.getInt(1);
+
+				stmt.executeUpdate("INSERT INTO Ordered VALUES(" + orderNum + ","
+						+ storeComboBox.getSelectionModel().getSelectedItem().storeNum
+						+ ",'ãqíçñÏòY.com',0)");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		for (int i = 0; i < replenishmentOrders.size(); i++) {
+			Order order = replenishmentOrders.get(i);
+
+			try {
+				ResultSet rs = getRS("SELECT * FROM Item,Book WHERE Item.JANCode=Book.JANCode AND Item.JANCode="
+						+ order.book.janCode);
+				if (!rs.next()) {
+					stmt.executeUpdate("INSERT INTO Item VALUES(" + order.book.janCode + ","
+							+ order.book.price + ",NULL)");
+					stmt.executeUpdate("INSERT INTO Book VALUES(" + order.book.janCode + ","
+							+ order.book.bookTitle + "," + order.book.writer + ","
+							+ order.book.publisher + "," + order.book.googleID + ")");
+				}
+
+				stmt.executeUpdate("INSERT INTO OrderedDetail VALUES(" + orderNum + ","
+						+ storeComboBox.getSelectionModel().getSelectedItem().storeNum + "," + i
+						+ "," + order.book.janCode + "," + order.amount + ")");
+
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
 		try {
 			String cmd = "cmd.exe /c start order.bat";
 			Runtime.getRuntime().exec(cmd);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
+		replenishmentOrders.clear();
+		saveCSV();
 	}
 
 	@FXML

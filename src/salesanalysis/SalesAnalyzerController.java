@@ -125,7 +125,9 @@ public class SalesAnalyzerController extends Common implements Initializable {
 					+ "INNER JOIN Sale ON SaleDetail.SaleNum = Sale.SaleNum "
 					+ "INNER JOIN Item ON SaleDetail.JANCode = Item.JANCode "
 					+ "INNER JOIN Book ON SaleDetail.JANCode = Book.JANCode "
-					+ "GROUP BY SaleDetail.JANCode ORDER BY SaleDate DESC";
+					+ "WHERE SaleDetail.StoreNum="
+					+ storeComboBox.getSelectionModel().getSelectedItem().storeNum
+					+ " GROUP BY SaleDetail.JANCode ORDER BY SaleDate DESC";
 			ResultSet rs = stmt.executeQuery(sqlStr);
 
 			while (rs.next()) {
@@ -142,7 +144,9 @@ public class SalesAnalyzerController extends Common implements Initializable {
 					+ "INNER JOIN Sale ON SaleDetail.SaleNum = Sale.SaleNum "
 					+ "INNER JOIN Item ON SaleDetail.JANCode = Item.JANCode "
 					+ "INNER JOIN Book ON SaleDetail.JANCode = Book.JANCode "
-					+ "GROUP BY SaleDetail.JANCode ORDER BY Count DESC";
+					+ "WHERE SaleDetail.StoreNum="
+					+ storeComboBox.getSelectionModel().getSelectedItem().storeNum
+					+ " GROUP BY SaleDetail.JANCode ORDER BY Count DESC";
 			ResultSet rs = stmt.executeQuery(sqlStr);
 
 			while (rs.next()) {
@@ -160,7 +164,9 @@ public class SalesAnalyzerController extends Common implements Initializable {
 					+ "INNER JOIN Request ON RequestDetail.RequestNum = Request.RequestNum "
 					+ "INNER JOIN Item ON RequestDetail.JANCode = Item.JANCode "
 					+ "INNER JOIN Book ON RequestDetail.JANCode = Book.JANCode "
-					+ "GROUP BY RequestDetail.JANCode ORDER BY Count DESC";
+					+ "WHERE Request.StoreNum="
+					+ storeComboBox.getSelectionModel().getSelectedItem().storeNum
+					+ " GROUP BY RequestDetail.JANCode ORDER BY Count DESC";
 			ResultSet rs = stmt.executeQuery(sqlStr);
 
 			while (rs.next()) {
@@ -175,8 +181,10 @@ public class SalesAnalyzerController extends Common implements Initializable {
 		try {
 			String sqlStr = "SELECT Writer FROM SaleDetail "
 					+ "INNER JOIN Item ON SaleDetail.JANCode = Item.JANCode "
-					+ "INNER JOIN book ON SaleDetail.JANCode = Book.JANCode "
-					+ "WHERE Writer IS NOT NULL " + "GROUP BY Writer ORDER BY count(*) DESC";
+					+ "INNER JOIN Book ON SaleDetail.JANCode = Book.JANCode "
+					+ "WHERE Writer IS NOT NULL AND SaleDetail.StoreNum="
+					+ storeComboBox.getSelectionModel().getSelectedItem().storeNum
+					+ " GROUP BY Writer ORDER BY count(*) DESC";
 
 			ResultSet rs = stmt.executeQuery(sqlStr);
 
