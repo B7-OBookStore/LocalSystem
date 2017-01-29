@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="480.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="twitterclient.BooktterController">
+   <top>
+      <HBox alignment="BOTTOM_CENTER" style="-fx-background-color: #8B4513;" BorderPane.alignment="CENTER">
+         <children>
+            <Label maxWidth="1.7976931348623157E308" text="ぶっくったー for O書店" textFill="WHITE" HBox.hgrow="ALWAYS">
+               <font>
+                  <Font size="24.0" />
+               </font>
+            </Label>
+            <ToggleButton mnemonicParsing="false" onAction="#enableAutoReload" text="自動更新" />
+         </children>
+         <padding>
+            <Insets bottom="5.0" left="10.0" right="5.0" top="5.0" />
+         </padding>
+      </HBox>
+   </top>
+   <bottom>
+      <Pane style="-fx-background-color: #8B4513;" BorderPane.alignment="CENTER_LEFT">
+         <children>
+            <Label text="Copyright c 2016-2017 B7班;㈱今北産業 All Rights Reserved." textFill="WHITE">
+               <font>
+                  <Font size="8.0" />
+               </font>
+            </Label>
+         </children>
+      </Pane>
+   </bottom>
+   <left>
+      <VBox prefWidth="150.0" BorderPane.alignment="CENTER">
+         <children>
+            <VBox spacing="5.0">
+               <children>
+                  <AnchorPane>
+                     <children>
+                        <TextArea fx:id="tweetArea" prefHeight="250.0" prefWidth="150.0" />
+                        <ImageView fx:id="tweetImgView" fitHeight="80.0" fitWidth="60.0" onMouseClicked="#removeImg" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="5.0" />
+                     </children>
+                  </AnchorPane>
+                  <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#tweet" prefHeight="30.0" text="Tweet" />
+               </children>
+            </VBox>
+            <VBox alignment="BOTTOM_CENTER" spacing="10.0" VBox.vgrow="ALWAYS">
+               <children>
+                  <VBox spacing="3.0">
+                     <children>
+                        <Label text="店舗" />
+                        <ComboBox fx:id="storeComboBox" maxWidth="1.7976931348623157E308" onAction="#reload" />
+                     </children>
+                  </VBox>
+                  <VBox spacing="3.0">
+                     <children>
+                        <Label text="期間" />
+                        <ComboBox fx:id="periodComboBox" maxWidth="1.7976931348623157E308" onAction="#reload" />
+                     </children>
+                  </VBox>
+               </children>
+            </VBox>
+         </children>
+         <padding>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+         </padding>
+      </VBox>
+   </left>
+   <center>
+      <HBox prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+         <children>
+            <VBox HBox.hgrow="ALWAYS">
+               <children>
+                  <Label text="売上の多い書籍" />
+                  <ScrollPane fitToHeight="true" fitToWidth="true" VBox.vgrow="ALWAYS">
+                     <content>
+                        <VBox fx:id="popularBox" spacing="10.0">
+                           <padding>
+                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                           </padding>
+                        </VBox>
+                     </content>
+                  </ScrollPane>
+               </children>
+            </VBox>
+            <VBox HBox.hgrow="ALWAYS">
+               <children>
+                  <Label text="最近入荷した書籍" />
+                  <ScrollPane fitToHeight="true" fitToWidth="true" VBox.vgrow="ALWAYS">
+                     <content>
+                        <VBox fx:id="arrivalBox" spacing="10.0">
+                           <padding>
+                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                           </padding>
+                        </VBox>
+                     </content>
+                  </ScrollPane>
+               </children>
+            </VBox>
+         </children>
+         <padding>
+            <Insets bottom="2.0" top="2.0" />
+         </padding>
+      </HBox>
+   </center>
+   <right>
+      <VBox prefWidth="180.0" BorderPane.alignment="CENTER">
+         <children>
+            <VBox maxWidth="1.7976931348623157E308" style="-fx-background-color: #c0c0c0;">
+               <children>
+                  <Label text="\@B7_OBookStore">
+                     <font>
+                        <Font size="15.0" />
+                     </font>
+                  </Label>
+               </children>
+               <padding>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </padding>
+            </VBox>
+            <ScrollPane fitToHeight="true" fitToWidth="true" VBox.vgrow="ALWAYS">
+               <content>
+                  <VBox fx:id="timelineBox" spacing="10.0">
+                     <padding>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </padding>
+                  </VBox>
+               </content>
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+            </ScrollPane>
+         </children>
+         <padding>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+         </padding>
+      </VBox>
+   </right>
+</BorderPane>

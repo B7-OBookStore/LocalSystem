@@ -169,7 +169,7 @@
                               <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
                            </padding>
                         </Label>
-                        <TextField fx:id="cashField" disable="true" maxWidth="1.7976931348623157E308" />
+                        <TextField fx:id="cashField" disable="true" maxWidth="1.7976931348623157E308" onAction="#confirm" />
                      </children>
                   </VBox>
                   <VBox>

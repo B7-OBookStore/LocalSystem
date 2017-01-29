@@ -18,6 +18,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableView;
@@ -40,6 +41,7 @@ import common.Store;
 public class SalesAnalyzerController extends Common implements Initializable {
 	public TextField amountTextField;
 
+	public Label clockLabel;
 	public ComboBox<Store> storeComboBox;
 	public ComboBox<String> periodComboBox;
 	public TableView<Sale> recentTableView;
@@ -107,18 +109,26 @@ public class SalesAnalyzerController extends Common implements Initializable {
 				.setCellValueFactory(new PropertyValueFactory<>("amountProperty"));
 
 		reload();
-		loadCSV();
 	}
 
 	@FXML
-	void reload() {
+	@Override
+	public void reload() {
+		recentSales.clear();
+		popularSales.clear();
+		orderSales.clear();
+		writers.clear();
+		replenishmentOrders.clear();
+
 		try {
 			String sqlStr = "SELECT Sale.SaleDate,Age,SaleDetail.JANCode,SaleDetail.Price,SaleDetail.Discount,BookTitle,Writer,Publisher,GoogleID FROM SaleDetail "
 					+ "INNER JOIN Sale ON SaleDetail.SaleNum = Sale.SaleNum "
 					+ "INNER JOIN Item ON SaleDetail.JANCode = Item.JANCode "
 					+ "INNER JOIN Book ON SaleDetail.JANCode = Book.JANCode "
-					+ "GROUP BY SaleDetail.JANCode ORDER BY SaleDate DESC";
-			ResultSet rs = stmt.executeQuery(sqlStr);
+					+ "WHERE SaleDetail.StoreNum="
+					+ storeComboBox.getSelectionModel().getSelectedItem().storeNum
+					+ " GROUP BY SaleDetail.JANCode ORDER BY SaleDate DESC";
+			ResultSet rs = getRS(sqlStr);
 
 			while (rs.next()) {
 				Book book = new Book(rs.getString("JANCode"), rs.getInt("Price"),
@@ -134,8 +144,10 @@ public class SalesAnalyzerController extends Common implements Initializable {
 					+ "INNER JOIN Sale ON SaleDetail.SaleNum = Sale.SaleNum "
 					+ "INNER JOIN Item ON SaleDetail.JANCode = Item.JANCode "
 					+ "INNER JOIN Book ON SaleDetail.JANCode = Book.JANCode "
-					+ "GROUP BY SaleDetail.JANCode ORDER BY Count DESC";
-			ResultSet rs = stmt.executeQuery(sqlStr);
+					+ "WHERE SaleDetail.StoreNum="
+					+ storeComboBox.getSelectionModel().getSelectedItem().storeNum
+					+ " GROUP BY SaleDetail.JANCode ORDER BY Count DESC";
+			ResultSet rs = getRS(sqlStr);
 
 			while (rs.next()) {
 				Book book = new Book(rs.getString("JANCode"), rs.getInt("Price"),
@@ -152,8 +164,10 @@ public class SalesAnalyzerController extends Common implements Initializable {
 					+ "INNER JOIN Request ON RequestDetail.RequestNum = Request.RequestNum "
 					+ "INNER JOIN Item ON RequestDetail.JANCode = Item.JANCode "
 					+ "INNER JOIN Book ON RequestDetail.JANCode = Book.JANCode "
-					+ "GROUP BY RequestDetail.JANCode ORDER BY Count DESC";
-			ResultSet rs = stmt.executeQuery(sqlStr);
+					+ "WHERE Request.StoreNum="
+					+ storeComboBox.getSelectionModel().getSelectedItem().storeNum
+					+ " GROUP BY RequestDetail.JANCode ORDER BY Count DESC";
+			ResultSet rs = getRS(sqlStr);
 
 			while (rs.next()) {
 				Book book = new Book(rs.getString("JANCode"), rs.getInt("Price"),
@@ -167,10 +181,12 @@ public class SalesAnalyzerController extends Common implements Initializable {
 		try {
 			String sqlStr = "SELECT Writer FROM SaleDetail "
 					+ "INNER JOIN Item ON SaleDetail.JANCode = Item.JANCode "
-					+ "INNER JOIN book ON SaleDetail.JANCode = Book.JANCode "
-					+ "WHERE Writer IS NOT NULL " + "GROUP BY Writer ORDER BY count(*) DESC";
+					+ "INNER JOIN Book ON SaleDetail.JANCode = Book.JANCode "
+					+ "WHERE Writer IS NOT NULL AND SaleDetail.StoreNum="
+					+ storeComboBox.getSelectionModel().getSelectedItem().storeNum
+					+ " GROUP BY Writer ORDER BY count(*) DESC";
 
-			ResultSet rs = stmt.executeQuery(sqlStr);
+			ResultSet rs = getRS(sqlStr);
 
 			while (rs.next()) {
 				writers.add(rs.getString("Writer"));
@@ -178,6 +194,8 @@ public class SalesAnalyzerController extends Common implements Initializable {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+
+		loadCSV();
 	}
 
 	void setTableColumn(TableView<Sale> recentTableView2) {
@@ -284,21 +302,33 @@ public class SalesAnalyzerController extends Common implements Initializable {
 		switch (index) {
 		case 0:
 			book = recentTableView.getSelectionModel().getSelectedItem().book;
-			replenishmentOrders.add(new Order(book, Integer.parseInt(amountTextField.getText())));
+			addReplenishmentList(book, Integer.parseInt(amountTextField.getText()));
 			break;
 		case 1:
 			book = popularTableView.getSelectionModel().getSelectedItem().book;
-			replenishmentOrders.add(new Order(book, Integer.parseInt(amountTextField.getText())));
+			addReplenishmentList(book, Integer.parseInt(amountTextField.getText()));
 			break;
 		case 2:
 			book = orderTableView.getSelectionModel().getSelectedItem().book;
-			replenishmentOrders.add(new Order(book, Integer.parseInt(amountTextField.getText())));
+			addReplenishmentList(book, Integer.parseInt(amountTextField.getText()));
 			break;
 		case 3:
 			book = writerTableView.getSelectionModel().getSelectedItem();
-			replenishmentOrders.add(new Order(book, Integer.parseInt(amountTextField.getText())));
+			addReplenishmentList(book, Integer.parseInt(amountTextField.getText()));
 			break;
 		}
+
+		saveCSV();
+	}
+
+	void addReplenishmentList(Book book, int amount) {
+		for (Order order : replenishmentOrders) {
+			if (order.book.janCode.equals(book.janCode)) {
+				order.amount += amount;
+				return;
+			}
+		}
+		replenishmentOrders.add(new Order(book, amount));
 	}
 
 	void loadCSV() {
@@ -310,7 +340,7 @@ public class SalesAnalyzerController extends Common implements Initializable {
 
 			String line = "";
 			while ((line = br.readLine()) != null) {
-				String[] order = line.split(",");
+				String[] order = line.split("\t");
 
 				Book book = new Book(order[0], Integer.valueOf(order[1]),
 						Integer.valueOf(order[2]), order[3], order[4], order[5], order[6]);
@@ -331,13 +361,13 @@ public class SalesAnalyzerController extends Common implements Initializable {
 			bw = new BufferedWriter(new FileWriter(file));
 
 			for (Order order : replenishmentOrders) {
-				bw.write(order.book.janCode + ",");
-				bw.write(order.book.price + ",");
-				bw.write(order.book.discount + ",");
-				bw.write(order.book.bookTitle + ",");
-				bw.write(order.book.writer + ",");
-				bw.write(order.book.publisher + ",");
-				bw.write(order.book.googleID + ",");
+				bw.write(order.book.janCode + "\t");
+				bw.write(order.book.price + "\t");
+				bw.write(order.book.discount + "\t");
+				bw.write(order.book.bookTitle + "\t");
+				bw.write(order.book.writer + "\t");
+				bw.write(order.book.publisher + "\t");
+				bw.write(order.book.googleID + "\t");
 				bw.write(order.amount + "");
 				bw.newLine();
 			}
