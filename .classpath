@@ -8,5 +8,6 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/mysql-connector-java-5.1.40-bin.jar"/>
 	<classpathentry kind="lib" path="resources"/>
+	<classpathentry kind="lib" path="C:/eclipse/workspace/OBookStore/lib/twitter4j-core-4.0.4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
