@@ -2,10 +2,12 @@ package twitterclient;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.ResultSet;
 import java.util.ResourceBundle;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -95,29 +97,7 @@ public class BooktterController extends Common implements Initializable {
 						rs.getInt("Discount"), rs.getString("BookTitle"), rs.getString("Writer"),
 						rs.getString("Publisher"), rs.getString("GoogleID"));
 
-				VBox bookBox = new VBox(2);
-				URL url = new URL("http://books.google.com/books/content?id=" + book.googleID
-						+ "&printsec=frontcover&img=1&zoom=5&source=gbs_api");
-				Image img = new Image(url.toString());
-				ImageView imgView = new ImageView(img);
-				Label label = new Label(book.bookTitle);
-				label.setMaxWidth(128);
-
-				bookBox.setOnMouseClicked((MouseEvent) -> {
-					tweetArea.setText("Åy"
-							+ storeComboBox.getSelectionModel().getSelectedItem().storeName
-							+ "Åz\nç≈ãﬂîÑÇÍÇƒÇ¢Ç‹Ç∑ÅI\n" + book.bookTitle + "\n(" + book.writer + ")");
-					tweetImgView.setImage(img);
-					try {
-						BufferedImage bi = ImageIO.read(url);
-						tweetImgFile = new File("thumbnail.jpg");
-						ImageIO.write(bi, "jpg", tweetImgFile);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				});
-
-				bookBox.getChildren().addAll(imgView, label);
+				VBox bookBox = getBookBox(book, "îÑÇÍÇƒÇ‹Ç∑ÅI");
 				popularBox.getChildren().add(bookBox);
 			}
 		} catch (Exception e) {
@@ -126,7 +106,7 @@ public class BooktterController extends Common implements Initializable {
 
 		try {
 			String sqlStr = "SELECT OrderedDetail.JANCode,Price,Discount,BookTitle,Writer,Publisher,GoogleID FROM Ordered "
-					+ "INNER JOIN OrderedDetail ON Ordered.OrderNum=OrderedDetail.OrderNum "
+					+ "INNER JOIN OrderedDetail ON Ordered.OrderNum=OrderedDetail.OrderNum AND Ordered.StoreNum=OrderedDetail.StoreNum "
 					+ "INNER JOIN Item ON OrderedDetail.JANCode=Item.JANCode "
 					+ "INNER JOIN Book ON OrderedDetail.JANCode=Book.JANCode "
 					+ "WHERE Ordered.StoreNum="
@@ -140,34 +120,54 @@ public class BooktterController extends Common implements Initializable {
 						rs.getInt("Discount"), rs.getString("BookTitle"), rs.getString("Writer"),
 						rs.getString("Publisher"), rs.getString("GoogleID"));
 
-				VBox bookBox = new VBox(2);
-				URL url = new URL("http://books.google.com/books/content?id=" + book.googleID
-						+ "&printsec=frontcover&img=1&zoom=5&source=gbs_api");
-				Image img = new Image(url.toString());
-				ImageView imgView = new ImageView(img);
-				Label label = new Label(book.bookTitle);
-				label.setMaxWidth(128);
-
-				bookBox.setOnMouseClicked((MouseEvent) -> {
-					tweetArea.setText("Åy"
-							+ storeComboBox.getSelectionModel().getSelectedItem().storeName
-							+ "Åz\nì¸â◊ÇµÇ‹ÇµÇΩÅI\n" + book.bookTitle + "\n(" + book.writer + ")");
-					tweetImgView.setImage(img);
-					try {
-						BufferedImage bi = ImageIO.read(url);
-						tweetImgFile = new File("thumbnail.jpg");
-						ImageIO.write(bi, "jpg", tweetImgFile);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				});
-
-				bookBox.getChildren().addAll(imgView, label);
+				VBox bookBox = getBookBox(book, "ì¸â◊ÇµÇ‹ÇµÇΩÅI");
 				arrivalBox.getChildren().add(bookBox);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	VBox getBookBox(Book book, String str) {
+		VBox bookBox = new VBox(2);
+		Label label = new Label(book.bookTitle);
+
+		ImageView imgView = new ImageView();
+
+		try {
+			URL url = new URL("http://books.google.com/books/content?id=" + book.googleID
+					+ "&printsec=frontcover&img=1&zoom=5&source=gbs_api");
+
+			Platform.runLater(() -> {
+				Image img = new Image(url.toString());
+				imgView.setImage(img);
+			});
+
+			bookBox.setOnMouseClicked((MouseEvent) -> {
+				tweetArea.setText("Åy"
+						+ storeComboBox.getSelectionModel().getSelectedItem().storeName + "Åz\n"
+						+ str + "\n" + book.bookTitle + "\n(" + book.writer + ")");
+				Image img = new Image(url.toString());
+				tweetImgView.setImage(img);
+
+				try {
+					BufferedImage bi = ImageIO.read(url);
+					tweetImgFile = new File("thumbnail.jpg");
+					ImageIO.write(bi, "jpg", tweetImgFile);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			});
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		label.setMaxWidth(128);
+		bookBox.getStyleClass().add("bookBox");
+
+		bookBox.getChildren().addAll(imgView, label);
+
+		return bookBox;
 	}
 
 	void updateTimeline() {

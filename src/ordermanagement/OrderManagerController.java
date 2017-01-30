@@ -284,9 +284,9 @@ public class OrderManagerController extends Common implements Initializable {
 				if (!rs.next()) {
 					stmt.executeUpdate("INSERT INTO Item VALUES(" + order.book.janCode + ","
 							+ order.book.price + ",NULL)");
-					stmt.executeUpdate("INSERT INTO Book VALUES(" + order.book.janCode + ","
-							+ order.book.bookTitle + "," + order.book.writer + ","
-							+ order.book.publisher + "," + order.book.googleID + ")");
+					stmt.executeUpdate("INSERT INTO Book VALUES(" + order.book.janCode + ",'"
+							+ order.book.bookTitle + "','" + order.book.writer + "','"
+							+ order.book.publisher + "','" + order.book.googleID + "')");
 				}
 
 				stmt.executeUpdate("INSERT INTO OrderedDetail VALUES(" + orderNum + ","

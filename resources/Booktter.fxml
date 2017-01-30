@@ -15,7 +15,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="480.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="twitterclient.BooktterController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="480.0" prefWidth="640.0" stylesheets="@Booktter.css" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="twitterclient.BooktterController">
    <top>
       <HBox alignment="BOTTOM_CENTER" style="-fx-background-color: #8B4513;" BorderPane.alignment="CENTER">
          <children>
@@ -88,7 +88,7 @@
                      <content>
                         <VBox fx:id="popularBox" spacing="10.0">
                            <padding>
-                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                              <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
                            </padding>
                         </VBox>
                      </content>
@@ -102,7 +102,7 @@
                      <content>
                         <VBox fx:id="arrivalBox" spacing="10.0">
                            <padding>
-                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                              <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
                            </padding>
                         </VBox>
                      </content>
