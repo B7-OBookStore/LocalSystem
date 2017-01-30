@@ -1,0 +1,8 @@
+.bookBox {
+	-fx-background-color:#FFFFFF;
+	-fx-padding:2;
+}
+
+.bookBox:hover {
+	-fx-background-color:#FFE4B5;
+}

@@ -29,7 +29,7 @@ public class AccountingManager extends Application {
 		if (splashScreen != null)
 			splashScreen.close();
 		stage.setScene(new Scene(root));
-		stage.setTitle("O書店 売上分析システム");
+		stage.setTitle("O書店 会計管理システム");
 		stage.show();
 	}
 
